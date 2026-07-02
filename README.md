@@ -10,6 +10,8 @@ This project gives you a calm boundary:
 
 It is not about being rude. It is about making the relationship more equal.
 
+![ticket-back screenshot](assets/screenshot.webp)
+
 ## 中文
 
 > 如果他们要求你填表，他们也可以填表。
