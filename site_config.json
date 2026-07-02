@@ -1,0 +1,70 @@
+{
+  "siteTitle": {
+    "en": "Personal Request Desk",
+    "zh": "个人服务台"
+  },
+  "defaultLanguage": "zh",
+  "text": {
+    "en": {
+      "brand": "Personal Desk",
+      "headline": "Requests start with a ticket.",
+      "replyText": "Please submit a ticket first so I have the request, priority, deadline, and contact details in one place. Emergency or urgent work is not accepted here."
+    },
+    "zh": {
+      "brand": "个人服务台",
+      "headline": "先提交工单，再开始处理。",
+      "replyText": "请先提交工单，把请求内容、优先级、截止时间和联系方式写清楚。紧急请求不在这里受理。"
+    }
+  },
+  "ad": {
+    "enabled": true,
+    "title": {
+      "en": "Ad placeholder",
+      "zh": "广告占位"
+    },
+    "body": {
+      "en": "Reserved for a future ad, announcement, or sponsor message.",
+      "zh": "这里预留给未来的广告、公告或赞助信息。"
+    },
+    "linkText": {
+      "en": "Learn more",
+      "zh": "了解更多"
+    },
+    "url": ""
+  },
+  "categories": [
+    { "value": "Network", "label": { "en": "Network", "zh": "网络" } },
+    { "value": "Computer", "label": { "en": "Computer", "zh": "电脑" } },
+    { "value": "Account", "label": { "en": "Account", "zh": "账号" } },
+    { "value": "Software", "label": { "en": "Software", "zh": "软件" } },
+    { "value": "Hardware", "label": { "en": "Hardware", "zh": "硬件" } },
+    { "value": "Data or report", "label": { "en": "Data or report", "zh": "数据或报表" } },
+    { "value": "Other", "label": { "en": "Other", "zh": "其他" } }
+  ],
+  "priorities": [
+    { "value": "Low", "label": { "en": "Low", "zh": "低" } },
+    { "value": "Normal", "label": { "en": "Normal", "zh": "普通" } },
+    { "value": "High", "label": { "en": "High", "zh": "高" } }
+  ],
+  "emergency": {
+    "enabled": true,
+    "keywords": ["emergency", "urgent", "asap", "immediately", "911", "紧急", "急需", "立即", "马上"]
+  },
+  "validation": {
+    "summaryMinLength": 12,
+    "detailsMinLength": 30,
+    "triedMinLength": 10,
+    "referenceMinLength": 3,
+    "maxTextLength": 1500,
+    "maxSummaryLength": 90,
+    "minimumChallengeAgeSeconds": 3
+  },
+  "security": {
+    "maxRequestBytes": 12000,
+    "rateLimits": {
+      "challenge": { "limit": 20, "windowSeconds": 300 },
+      "submit": { "limit": 6, "windowSeconds": 3600 },
+      "api": { "limit": 120, "windowSeconds": 300 }
+    }
+  }
+}

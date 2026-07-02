@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>个人服务台</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <aside class="sidebar" aria-label="Desk controls">
+        <div>
+          <p class="eyebrow" data-i18n="brand">Personal Desk</p>
+          <h1 data-i18n="headline">Requests start with a ticket.</h1>
+        </div>
+
+        <div class="language-toggle" aria-label="Language">
+          <button class="lang-button" data-lang="en" type="button" aria-pressed="false">EN</button>
+          <button class="lang-button active" data-lang="zh" type="button" aria-pressed="true">中文</button>
+        </div>
+
+        <nav class="tabs" aria-label="Views">
+          <button class="tab active" data-view="submit" type="button" aria-pressed="true">
+            <span class="tab-icon" aria-hidden="true">+</span>
+            <span class="tab-label" data-i18n="tabSubmit">Submit</span>
+          </button>
+          <button class="tab" data-view="queue" type="button" aria-pressed="false">
+            <span class="tab-icon" aria-hidden="true">#</span>
+            <span class="tab-label" data-i18n="tabQueue">Queue</span>
+          </button>
+        </nav>
+
+        <section class="quick-reply" aria-labelledby="reply-title">
+          <h2 id="reply-title" data-i18n="callReplyTitle">Call Reply</h2>
+          <p id="replyText" data-i18n="replyText">Please submit a ticket first so I have the request, urgency, deadline, and contact details in one place.</p>
+          <button class="secondary" id="copyReply" type="button" data-i18n="copyReply">Copy Reply</button>
+        </section>
+
+        <section class="stats" aria-label="Ticket totals">
+          <div>
+            <strong id="openCount">0</strong>
+            <span data-i18n="statOpen">Open</span>
+          </div>
+          <div>
+            <strong id="todayCount">0</strong>
+            <span data-i18n="statToday">Today</span>
+          </div>
+          <div>
+            <strong id="highCount">0</strong>
+            <span data-i18n="statHigh">High</span>
+          </div>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <section class="view active" id="submitView" aria-labelledby="submit-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="intakeForm">Intake Form</p>
+              <h2 id="submit-title" data-i18n="newRequest">New request</h2>
+            </div>
+            <button class="ghost" id="resetForm" type="button" data-i18n="reset">Reset</button>
+          </div>
+
+          <form id="ticketForm" autocomplete="on">
+            <div class="bot-trap" aria-hidden="true">
+              <label for="companyWebsite">Company website</label>
+              <input id="companyWebsite" name="companyWebsite" tabindex="-1" autocomplete="off">
+            </div>
+            <input id="notEmergency" name="notEmergency" type="hidden" value="true">
+
+            <fieldset class="verification-box">
+              <legend data-i18n="verificationTitle">Requester verification</legend>
+              <p data-i18n="verificationIntro">Verify your phone and internal ID before the request form can be submitted.</p>
+
+              <div class="form-grid">
+                <label for="phone">
+                  <span data-i18n="phone">Phone number</span>
+                  <input id="phone" name="phone" type="tel" required pattern="^[+0-9 ()-]{7,24}$" data-i18n-placeholder="phonePlaceholder" placeholder="+1 555 010 1234">
+                </label>
+                <label for="identityId">
+                  <span data-i18n="identityId">Work or school ID</span>
+                  <input id="identityId" name="identityId" required minlength="4" maxlength="32" pattern="^[A-Za-z0-9-]{4,32}$" data-i18n-placeholder="identityPlaceholder" placeholder="Employee or student ID">
+                </label>
+                <label for="orgCode">
+                  <span data-i18n="orgCode">Department code</span>
+                  <input id="orgCode" name="orgCode" required minlength="3" maxlength="24" pattern="^[A-Za-z0-9-]{3,24}$" data-i18n-placeholder="orgPlaceholder" placeholder="Team or office code">
+                </label>
+              </div>
+
+              <div class="challenge-row">
+                <div>
+                  <span class="challenge-label" data-i18n="verificationCode">Verification code</span>
+                  <strong id="challengeCode">------</strong>
+                </div>
+                <button class="secondary" id="refreshChallenge" type="button" data-i18n="refreshCode">Refresh Code</button>
+              </div>
+
+              <label for="challengeAnswer">
+                <span data-i18n="typeCode">Type the verification code</span>
+                <input id="challengeAnswer" name="challengeAnswer" inputmode="numeric" required pattern="^[0-9]{6}$" data-i18n-placeholder="codePlaceholder" placeholder="6-digit code">
+              </label>
+
+              <label class="check" for="verificationConfirm">
+                <input id="verificationConfirm" name="verificationConfirm" type="checkbox" required>
+                <span data-i18n="verificationConfirm">I confirm my phone, ID, and request details are accurate.</span>
+              </label>
+            </fieldset>
+
+            <div class="form-grid">
+              <label for="requester">
+                <span data-i18n="requester">Your name</span>
+                <input id="requester" name="requester" required minlength="2" data-i18n-placeholder="requesterPlaceholder" placeholder="Full name">
+              </label>
+              <label for="contact">
+                <span data-i18n="contact">Contact</span>
+                <input id="contact" name="contact" required minlength="5" data-i18n-placeholder="contactPlaceholder" placeholder="Email, phone, or chat ID">
+              </label>
+              <label for="team">
+                <span data-i18n="team">Team or location</span>
+                <input id="team" name="team" required minlength="3" data-i18n-placeholder="teamPlaceholder" placeholder="Department, office, room">
+              </label>
+              <label for="category">
+                <span data-i18n="category">Category</span>
+                <select id="category" name="category" required>
+                  <option value="" data-i18n="chooseOne">Choose one</option>
+                  <option value="Network" data-i18n="catNetwork">Network</option>
+                  <option value="Computer" data-i18n="catComputer">Computer</option>
+                  <option value="Account" data-i18n="catAccount">Account</option>
+                  <option value="Software" data-i18n="catSoftware">Software</option>
+                  <option value="Hardware" data-i18n="catHardware">Hardware</option>
+                  <option value="Data or report" data-i18n="catData">Data or report</option>
+                  <option value="Other" data-i18n="catOther">Other</option>
+                </select>
+              </label>
+              <label for="priority">
+                <span data-i18n="priority">Priority</span>
+                <select id="priority" name="priority" required>
+                  <option value="" data-i18n="chooseOne">Choose one</option>
+                  <option value="Low" data-i18n="priorityLow">Low</option>
+                  <option value="Normal" data-i18n="priorityNormal">Normal</option>
+                  <option value="High" data-i18n="priorityHigh">High</option>
+                </select>
+              </label>
+              <label for="neededBy">
+                <span data-i18n="neededBy">Needed by</span>
+                <input id="neededBy" name="neededBy" type="date" required>
+              </label>
+            </div>
+
+            <label for="summary">
+              <span data-i18n="summary">Request summary</span>
+              <input id="summary" name="summary" required minlength="12" maxlength="90" data-i18n-placeholder="summaryPlaceholder" placeholder="One sentence summary">
+            </label>
+
+            <label for="details">
+              <span data-i18n="details">Details</span>
+              <textarea id="details" name="details" required minlength="30" rows="6" data-i18n-placeholder="detailsPlaceholder" placeholder="What do you need, what is blocked, and what outcome would be acceptable?"></textarea>
+            </label>
+
+            <label for="tried">
+              <span data-i18n="tried">What have you tried?</span>
+              <textarea id="tried" name="tried" required minlength="10" rows="4" data-i18n-placeholder="triedPlaceholder" placeholder="Steps already taken, screenshots or links, error messages"></textarea>
+            </label>
+
+            <label for="reference">
+              <span data-i18n="reference">Link or reference</span>
+              <input id="reference" name="reference" required minlength="3" data-i18n-placeholder="referencePlaceholder" placeholder="URL, document path, asset tag, ticket number">
+            </label>
+
+            <div class="consent-row">
+              <label class="check" for="available">
+                <input id="available" name="available" type="checkbox" required>
+                <span data-i18n="available">I will be available for follow-up questions.</span>
+              </label>
+            </div>
+
+            <div class="actions">
+              <button class="primary" type="submit" data-i18n="createTicket">Create Ticket</button>
+              <p class="form-status" id="formStatus" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+        </section>
+
+        <section class="view" id="queueView" aria-labelledby="queue-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow" data-i18n="ownerView">Owner View</p>
+              <h2 id="queue-title" data-i18n="ticketQueue">Ticket queue</h2>
+            </div>
+            <div class="toolbar">
+              <button class="secondary" id="exportCsv" type="button" data-i18n="exportCsv">Export CSV</button>
+              <button class="danger" id="clearDone" type="button" data-i18n="clearDone">Clear Done</button>
+            </div>
+          </div>
+
+          <div class="filters" aria-label="Queue filters">
+            <label for="searchTickets">
+              <span data-i18n="search">Search</span>
+              <input id="searchTickets" data-i18n-placeholder="searchPlaceholder" placeholder="Name, category, summary">
+            </label>
+            <label for="statusFilter">
+              <span data-i18n="status">Status</span>
+              <select id="statusFilter">
+                <option value="all" data-i18n="all">All</option>
+                <option value="New" data-i18n="statusNew">New</option>
+                <option value="Accepted" data-i18n="statusAccepted">Accepted</option>
+                <option value="Waiting" data-i18n="statusWaiting">Waiting</option>
+                <option value="Done" data-i18n="statusDone">Done</option>
+              </select>
+            </label>
+            <label for="priorityFilter">
+              <span data-i18n="priority">Priority</span>
+              <select id="priorityFilter">
+                <option value="all" data-i18n="all">All</option>
+                <option value="High" data-i18n="priorityHigh">High</option>
+                <option value="Normal" data-i18n="priorityNormal">Normal</option>
+                <option value="Low" data-i18n="priorityLow">Low</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="queue-layout">
+            <div class="ticket-list" id="ticketList" aria-label="Tickets"></div>
+            <article class="ticket-detail" id="ticketDetail" aria-live="polite">
+              <div class="empty-state">
+                <h3>No ticket selected</h3>
+                <p>Choose a ticket from the queue.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <div class="ad-modal" id="adModal" hidden>
+      <div class="ad-backdrop"></div>
+      <section class="ad-dialog" role="dialog" aria-modal="true" aria-labelledby="ad-title">
+        <p class="eyebrow" data-i18n="adEyebrow">Ad Space</p>
+        <h2 id="ad-title" data-i18n="adTitle">Placeholder</h2>
+        <p id="adBody" data-i18n="adBody">Reserved for a future ad, announcement, or sponsor message.</p>
+        <div class="ad-actions">
+          <button class="primary" id="adAction" type="button" data-i18n="adLinkText">Learn more</button>
+          <button class="secondary" id="adClose" type="button" disabled data-i18n="adCloseLocked">Click Ad First</button>
+        </div>
+        <p class="ad-hint" id="adHint" data-i18n="adClickRequired">Click the ad once to enable closing.</p>
+      </section>
+    </div>
+
+    <template id="ticketButtonTemplate">
+      <button class="ticket-item" type="button">
+        <span class="ticket-topline">
+          <strong class="ticket-id"></strong>
+          <span class="badge"></span>
+        </span>
+        <span class="ticket-summary"></span>
+        <span class="ticket-meta"></span>
+      </button>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
