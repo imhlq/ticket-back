@@ -19,14 +19,20 @@ CONFIG_FILE = ROOT / "site_config.json"
 PUBLIC_EXTENSIONS = {".html", ".css", ".js", ".ico", ".png", ".jpg", ".jpeg", ".webp", ".svg"}
 STATUSES = {"New", "Accepted", "Waiting", "Done"}
 DEFAULT_PRIORITIES = {"Low", "Normal", "High"}
-DEFAULT_CATEGORIES = {"Network", "Computer", "Account", "Software", "Hardware", "Data or report", "Other"}
+DEFAULT_CATEGORIES = {
+    "Identity check",
+    "Address proof",
+    "Account access",
+    "Payment or fee",
+    "Appointment",
+    "Document request",
+    "Other",
+}
 BASE_REQUIRED_FIELDS = {
     "requester",
     "contact",
     "team",
     "category",
-    "priority",
-    "neededBy",
     "summary",
     "details",
     "tried",
@@ -53,6 +59,10 @@ DEFAULT_CONFIG = {
     "defaultLanguage": "zh",
     "categories": [{"value": value} for value in sorted(DEFAULT_CATEGORIES)],
     "priorities": [{"value": value} for value in sorted(DEFAULT_PRIORITIES)],
+    "form": {
+        "deadlineEnabled": True,
+        "priorityMode": "manual",
+    },
     "emergency": {
         "enabled": True,
         "keywords": ["emergency", "urgent", "asap", "immediately", "911", "紧急", "急需", "立即", "马上"],
@@ -147,7 +157,7 @@ class TicketStore:
     def create(self, payload):
         config = load_config()
         strictness = active_strictness_level(config)
-        required_fields = required_payload_fields(strictness)
+        required_fields = required_payload_fields(strictness, config)
         clean_payload = {key: clean(payload.get(key)) for key in required_fields}
         missing = [key for key, value in clean_payload.items() if not value]
         if missing:
@@ -157,11 +167,13 @@ class TicketStore:
             validate_challenge(payload, config)
         validate_payload(clean_payload, payload, config, strictness)
 
-        priority = clean_payload["priority"]
-        if priority not in config_values(config, "priorities", DEFAULT_PRIORITIES):
-            raise ValueError("Invalid priority")
         if clean_payload["category"] not in config_values(config, "categories", DEFAULT_CATEGORIES):
             raise ValueError("Invalid category")
+        clean_payload["priority"] = ticket_priority(clean_payload["category"], clean_payload.get("priority"), config)
+        if clean_payload["priority"] not in config_values(config, "priorities", DEFAULT_PRIORITIES):
+            raise ValueError("Invalid priority")
+        if not config.get("form", {}).get("deadlineEnabled", True):
+            clean_payload["neededBy"] = ""
 
         now = now_iso()
         ticket = {
@@ -266,6 +278,7 @@ def load_config():
         **config,
         "admin": {**DEFAULT_CONFIG["admin"], **config.get("admin", {})},
         "emergency": {**DEFAULT_CONFIG["emergency"], **config.get("emergency", {})},
+        "form": {**DEFAULT_CONFIG["form"], **config.get("form", {})},
         "strictness": merge_strictness(DEFAULT_CONFIG["strictness"], config.get("strictness", {})),
         "validation": {**DEFAULT_CONFIG["validation"], **config.get("validation", {})},
         "security": {**DEFAULT_CONFIG["security"], **config.get("security", {})},
@@ -306,8 +319,12 @@ def active_strictness_level(config):
     return levels.get(active_level) or levels.get("middle") or DEFAULT_CONFIG["strictness"]["levels"]["middle"]
 
 
-def required_payload_fields(strictness):
+def required_payload_fields(strictness, config):
     fields = set(BASE_REQUIRED_FIELDS)
+    if config.get("form", {}).get("deadlineEnabled", True):
+        fields.add("neededBy")
+    if config.get("form", {}).get("priorityMode") != "category":
+        fields.add("priority")
     fields.update(field for field in strictness.get("verificationFields", []) if field in VERIFICATION_FIELDS)
     fields.update(field for field in strictness.get("companyFields", []) if field in COMPANY_FIELDS)
     return fields
@@ -328,6 +345,15 @@ def config_values(config, key, fallback):
         if isinstance(item, dict) and clean(item.get("value"))
     }
     return values or fallback
+
+
+def ticket_priority(category, submitted_priority, config):
+    if config.get("form", {}).get("priorityMode") != "category":
+        return clean(submitted_priority)
+    for item in config.get("categories", []):
+        if isinstance(item, dict) and clean(item.get("value")) == category:
+            return clean(item.get("priority")) or "Normal"
+    return "Normal"
 
 
 def check_rate_limit(ip_address, scope, config):
@@ -410,12 +436,13 @@ def validate_payload(values, payload, config, strictness):
         raise ValueError("What you tried must be at least 10 characters.")
     if len(values["reference"]) < config_int(config, "validation", "referenceMinLength", 3):
         raise ValueError("Link or reference must be at least 3 characters.")
-    try:
-        needed_by = datetime.fromisoformat(values["neededBy"]).date()
-    except ValueError as error:
-        raise ValueError("Needed by must be a valid date.") from error
-    if needed_by < datetime.now(timezone.utc).date():
-        raise ValueError("Needed by cannot be in the past.")
+    if "neededBy" in values:
+        try:
+            needed_by = datetime.fromisoformat(values["neededBy"]).date()
+        except ValueError as error:
+            raise ValueError("Needed by must be a valid date.") from error
+        if needed_by < datetime.now(timezone.utc).date():
+            raise ValueError("Needed by cannot be in the past.")
     if not payload.get("available"):
         raise ValueError("You must confirm availability for follow-up questions.")
     if strictness.get("requireVerificationConfirm") and not payload.get("verificationConfirm"):
@@ -439,13 +466,13 @@ def validate_company_fields(values):
         if field in values and len(values[field]) < 2:
             raise ValueError(f"{field} is too short.")
     if "certificateUrl" in values and len(values["certificateUrl"]) > 300:
-        raise ValueError("Certificate link is too long.")
+        raise ValueError("Proof document link is too long.")
     if "certificateUrl" in values and not re.match(r"^https?://.{6,}$", values["certificateUrl"]):
-        raise ValueError("Certificate link must be a valid http or https URL.")
+        raise ValueError("Proof document link must be a valid http or https URL.")
     if "authorizationReference" in values and len(values["authorizationReference"]) > 1500:
-        raise ValueError("Authorization reference is too long.")
+        raise ValueError("Declaration and authorization is too long.")
     if "authorizationReference" in values and len(values["authorizationReference"]) < 20:
-        raise ValueError("Authorization reference must be at least 20 characters.")
+        raise ValueError("Declaration and authorization must be at least 20 characters.")
 
 
 def reject_emergency_text(values, config):

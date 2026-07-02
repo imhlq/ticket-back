@@ -597,6 +597,16 @@ textarea {
   line-height: 1.45;
 }
 
+.field-box.privacy-masked {
+  border-style: dashed;
+  background: #f4f7fa;
+}
+
+.field-box.privacy-masked p {
+  color: var(--muted);
+  font-style: italic;
+}
+
 .detail-actions {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

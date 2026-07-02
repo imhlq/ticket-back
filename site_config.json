@@ -33,6 +33,10 @@
   "admin": {
     "passcode": "2468"
   },
+  "form": {
+    "deadlineEnabled": false,
+    "priorityMode": "category"
+  },
   "strictness": {
     "activeLevel": "hard",
     "levels": {
@@ -65,13 +69,13 @@
     }
   },
   "categories": [
-    { "value": "Network", "label": { "en": "Network", "zh": "网络" } },
-    { "value": "Computer", "label": { "en": "Computer", "zh": "电脑" } },
-    { "value": "Account", "label": { "en": "Account", "zh": "账号" } },
-    { "value": "Software", "label": { "en": "Software", "zh": "软件" } },
-    { "value": "Hardware", "label": { "en": "Hardware", "zh": "硬件" } },
-    { "value": "Data or report", "label": { "en": "Data or report", "zh": "数据或报表" } },
-    { "value": "Other", "label": { "en": "Other", "zh": "其他" } }
+    { "value": "Identity check", "priority": "High", "label": { "en": "Identity check", "zh": "身份核验" } },
+    { "value": "Address proof", "priority": "High", "label": { "en": "Address proof", "zh": "地址证明" } },
+    { "value": "Account access", "priority": "High", "label": { "en": "Account access", "zh": "账号访问" } },
+    { "value": "Payment or fee", "priority": "Normal", "label": { "en": "Payment or fee", "zh": "缴费/费用" } },
+    { "value": "Appointment", "priority": "Normal", "label": { "en": "Appointment", "zh": "预约排队" } },
+    { "value": "Document request", "priority": "Normal", "label": { "en": "Document request", "zh": "文件/证明开具" } },
+    { "value": "Other", "priority": "Low", "label": { "en": "Other", "zh": "其他" } }
   ],
   "priorities": [
     { "value": "Low", "label": { "en": "Low", "zh": "低" } },

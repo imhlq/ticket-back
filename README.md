@@ -30,6 +30,7 @@ It is not about being rude. It is about making the relationship more equal.
 
 - Chinese-first bilingual intake interface
 - Configurable intake strictness with `easy`, `middle`, and `hard` modes
+- Optional deadline field and category-driven automatic priority
 - Ticket queue with status tracking, owner notes, and CSV export
 - Admin passcode protection for ticket operations and exports
 - Configurable site text, categories, priorities, validation rules, ad placeholder, and emergency keywords
@@ -37,19 +38,19 @@ It is not about being rude. It is about making the relationship more equal.
 
 ## Strictness modes
 
-| Mode | Verification | Required organization data | Best for |
+| Mode | Verification | Extra proof burden | Best for |
 | --- | --- | --- | --- |
 | `easy` | No challenge code, no verification confirmation, no phone/internal reference/department requirement | None | Friendly personal intake, low-friction demos, trusted requesters |
 | `middle` | Phone, internal reference ID, department code, verification code, and confirmation checkbox | None | Normal personal request desk use where requesters should provide traceable context |
-| `hard` | Phone, department code, verification code, and confirmation checkbox | Legal entity name, registration number, tax ID, certificate authority, public certificate/registry link, authorized representative, and authorization reference | Organization-facing requests where the requester should provide public business credentials first |
+| `hard` | Phone, department code, verification code, and confirmation checkbox | Full legal name, identity document type, redacted document/reference number, issuing office, proof document link, relationship to the request, and declaration/authorization text | Requests that mimic the repeated proof, forms, case numbers, and declarations institutions often demand from individuals |
 
 ## Privacy note
 
-Do not use this project to collect government IDs, private certificates, passwords, or sensitive personal information unless you have a lawful basis, clear notice, appropriate consent where required, secure storage, limited retention, and a way for people to request deletion. Hard mode is intended for public organization credentials, not personal identity documents.
+Do not use this project to collect full government IDs, passwords, private certificates, or sensitive personal files unless you have a lawful basis, clear notice, appropriate consent where required, secure storage, limited retention, and a way for people to request deletion. Hard mode is intended for redacted references and proof-burden satire, not for storing sensitive identity documents.
 
 ## 隐私提示
 
-除非你有合法依据、清晰告知、必要同意、安全存储、有限留存，以及删除请求机制，否则不要用本项目收集政府身份证件、非公开证书、密码或敏感个人信息。困难模式的目标是收集公开的公司/机构凭证，而不是个人身份证明文件。
+除非你有合法依据、清晰告知、必要同意、安全存储、有限留存，以及删除请求机制，否则不要用本项目收集完整身份证件、密码、非公开证书或敏感个人文件。困难模式的目标是使用打码参考信息来讽刺证明材料负担，而不是存储敏感身份证明文件。
 
 ## Run
 
@@ -72,6 +73,7 @@ Edit `site_config.json` to customize:
 - strictness level
 - site title and text
 - categories and priorities
+- deadline and priority behavior
 - ad placeholder content
 - admin passcode
 - validation limits

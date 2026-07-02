@@ -1,6 +1,5 @@
 const selectedKey = "personal-request-desk:selected";
 const languageKey = "personal-request-desk:language";
-const adminPasscodeKey = "personal-request-desk:admin-passcode";
 const statuses = ["New", "Accepted", "Waiting", "Done"];
 const noteTimers = new Map();
 let challenge = { id: "", code: "" };
@@ -30,23 +29,23 @@ const translations = {
     reset: "Reset",
     verificationTitle: "Requester verification",
     verificationIntro: "Provide basic contact verification before the request form can be submitted.",
-    hardVerificationTitle: "Company documentation",
-    hardVerificationIntro: "For strict mode, the requester must provide organization-level public records before asking for work.",
-    privacyNotice: "Do not submit government IDs, private certificates, passwords, or sensitive personal information. Use public business records and keep only what is necessary.",
-    companyLegalName: "Legal entity name",
-    companyLegalNamePlaceholder: "Registered company or organization name",
-    companyRegistrationNumber: "Registration number",
-    companyRegistrationPlaceholder: "Company registration or certificate number",
-    taxId: "Tax ID",
-    taxIdPlaceholder: "Taxpayer ID or equivalent",
-    certificateAuthority: "Certificate authority",
-    certificateAuthorityPlaceholder: "Issuing authority",
-    certificateUrl: "Certificate link",
-    certificateUrlPlaceholder: "Public certificate, license, or registry URL",
-    authorizedRepresentative: "Authorized representative",
-    authorizedRepresentativePlaceholder: "Person authorized to make this request",
-    authorizationReference: "Authorization reference",
-    authorizationReferencePlaceholder: "Explain why this person and organization are authorized to ask for this work.",
+    hardVerificationTitle: "Proof burden",
+    hardVerificationIntro: "For strict mode, the requester must provide the kind of proof and repeated context institutions often demand from individuals.",
+    privacyNotice: "Do not submit full government IDs, passwords, private certificates, or sensitive personal files. Use references, redacted proofs, and only what is necessary.",
+    companyLegalName: "Full legal name",
+    companyLegalNamePlaceholder: "Name exactly as shown on the record",
+    companyRegistrationNumber: "Identity document type",
+    companyRegistrationPlaceholder: "ID card, passport, student card, permit",
+    taxId: "Document/reference number",
+    taxIdPlaceholder: "Redacted document number or case reference",
+    certificateAuthority: "Issuing office",
+    certificateAuthorityPlaceholder: "School, agency, bank, platform, office",
+    certificateUrl: "Proof document link",
+    certificateUrlPlaceholder: "Redacted proof, screenshot, or previous notice URL",
+    authorizedRepresentative: "Relationship to request",
+    authorizedRepresentativePlaceholder: "Self, family member, tenant, student, customer",
+    authorizationReference: "Declaration and authorization",
+    authorizationReferencePlaceholder: "Explain why this request is valid, who authorized it, and which previous ticket or notice it relates to.",
     phone: "Phone number",
     phonePlaceholder: "+1 555 010 1234",
     identityId: "Internal reference ID",
@@ -69,12 +68,12 @@ const translations = {
     teamPlaceholder: "Department, office, room",
     category: "Category",
     chooseOne: "Choose one",
-    catNetwork: "Network",
-    catComputer: "Computer",
-    catAccount: "Account",
-    catSoftware: "Software",
-    catHardware: "Hardware",
-    catData: "Data or report",
+    catNetwork: "Identity check",
+    catComputer: "Address proof",
+    catAccount: "Account access",
+    catSoftware: "Payment or fee",
+    catHardware: "Appointment",
+    catData: "Document request",
     catOther: "Other",
     priority: "Priority",
     priorityLow: "Low",
@@ -99,8 +98,10 @@ const translations = {
     createError: "Could not create ticket.",
     updateError: "Could not update ticket.",
     clearError: "Could not clear completed tickets.",
+    noDeadline: "No deadline",
     authRequired: "Enter the admin passcode first.",
     authFailed: "Admin passcode is missing or incorrect.",
+    privacyHidden: "Hidden until admin passcode is entered",
     ownerView: "Owner View",
     ticketQueue: "Ticket queue",
     adminAccess: "Admin access",
@@ -133,13 +134,13 @@ const translations = {
     verifiedPhoneField: "Verified phone",
     identityField: "Internal reference",
     orgCodeField: "Department code",
-    companyLegalNameField: "Legal entity",
-    companyRegistrationNumberField: "Registration number",
-    taxIdField: "Tax ID",
-    certificateAuthorityField: "Certificate authority",
-    certificateUrlField: "Certificate link",
-    authorizedRepresentativeField: "Authorized representative",
-    authorizationReferenceField: "Authorization reference",
+    companyLegalNameField: "Full legal name",
+    companyRegistrationNumberField: "Identity document type",
+    taxIdField: "Document/reference number",
+    certificateAuthorityField: "Issuing office",
+    certificateUrlField: "Proof document link",
+    authorizedRepresentativeField: "Relationship to request",
+    authorizationReferenceField: "Declaration and authorization",
     availableYes: "Available for follow-up",
     availableNo: "Not confirmed",
     ownerNotes: "Owner notes",
@@ -167,23 +168,23 @@ const translations = {
     reset: "重置",
     verificationTitle: "请求人验证",
     verificationIntro: "提交前必须提供基础联系方式验证，并确认信息真实完整。",
-    hardVerificationTitle: "公司/机构文件",
-    hardVerificationIntro: "严格模式下，请求人必须提供组织层面的公开证明材料，才能提出请求。",
-    privacyNotice: "请不要提交政府身份证件、非公开证书、密码或敏感个人信息。请使用公开的企业/机构记录，并只保留必要信息。",
-    companyLegalName: "法定主体名称",
-    companyLegalNamePlaceholder: "注册公司或机构名称",
-    companyRegistrationNumber: "注册/证书编号",
-    companyRegistrationPlaceholder: "公司注册号或证书编号",
-    taxId: "税号",
-    taxIdPlaceholder: "纳税人识别号或等效编号",
-    certificateAuthority: "发证机关",
-    certificateAuthorityPlaceholder: "证书或执照的签发机关",
-    certificateUrl: "证书链接",
-    certificateUrlPlaceholder: "公开证书、执照或登记链接",
-    authorizedRepresentative: "授权代表",
-    authorizedRepresentativePlaceholder: "被授权提出此请求的人",
-    authorizationReference: "授权说明",
-    authorizationReferencePlaceholder: "说明该人员和组织为什么有权提出此请求。",
+    hardVerificationTitle: "证明材料负担",
+    hardVerificationIntro: "严格模式下，请求人必须提供机构经常要求个人反复提交的证明、背景和授权说明。",
+    privacyNotice: "请不要提交完整身份证件、密码、非公开证书或敏感个人文件。请使用编号、打码证明和必要信息。",
+    companyLegalName: "法定姓名",
+    companyLegalNamePlaceholder: "与记录一致的姓名",
+    companyRegistrationNumber: "身份证明类型",
+    companyRegistrationPlaceholder: "身份证、护照、学生证、居住证等",
+    taxId: "证件/参考编号",
+    taxIdPlaceholder: "打码后的证件号、案件号或参考编号",
+    certificateAuthority: "签发/受理机构",
+    certificateAuthorityPlaceholder: "学校、银行、平台、办事处或机构",
+    certificateUrl: "证明材料链接",
+    certificateUrlPlaceholder: "打码证明、截图或历史通知链接",
+    authorizedRepresentative: "与事项的关系",
+    authorizedRepresentativePlaceholder: "本人、家属、租客、学生、客户等",
+    authorizationReference: "声明与授权说明",
+    authorizationReferencePlaceholder: "说明请求为何有效、谁授权、对应哪个历史工单或通知。",
     phone: "手机号码",
     phonePlaceholder: "+86 138 0000 0000",
     identityId: "内部参考编号",
@@ -206,12 +207,12 @@ const translations = {
     teamPlaceholder: "部门、办公室、房间号",
     category: "类别",
     chooseOne: "请选择",
-    catNetwork: "网络",
-    catComputer: "电脑",
-    catAccount: "账号",
-    catSoftware: "软件",
-    catHardware: "硬件",
-    catData: "数据或报表",
+    catNetwork: "身份核验",
+    catComputer: "地址证明",
+    catAccount: "账号访问",
+    catSoftware: "缴费/费用",
+    catHardware: "预约排队",
+    catData: "文件/证明开具",
     catOther: "其他",
     priority: "优先级",
     priorityLow: "低",
@@ -236,8 +237,10 @@ const translations = {
     createError: "无法创建工单。",
     updateError: "无法更新工单。",
     clearError: "无法清除已完成工单。",
+    noDeadline: "无截止日期",
     authRequired: "请先输入管理员密码。",
     authFailed: "管理员密码缺失或错误。",
+    privacyHidden: "输入管理员密码后显示",
     ownerView: "处理人视图",
     ticketQueue: "工单队列",
     adminAccess: "管理员权限",
@@ -270,13 +273,13 @@ const translations = {
     verifiedPhoneField: "已验证手机号",
     identityField: "内部参考编号",
     orgCodeField: "部门代码",
-    companyLegalNameField: "法定主体",
-    companyRegistrationNumberField: "注册/证书编号",
-    taxIdField: "税号",
-    certificateAuthorityField: "发证机关",
-    certificateUrlField: "证书链接",
-    authorizedRepresentativeField: "授权代表",
-    authorizationReferenceField: "授权说明",
+    companyLegalNameField: "法定姓名",
+    companyRegistrationNumberField: "身份证明类型",
+    taxIdField: "证件/参考编号",
+    certificateAuthorityField: "签发/受理机构",
+    certificateUrlField: "证明材料链接",
+    authorizedRepresentativeField: "与事项的关系",
+    authorizationReferenceField: "声明与授权说明",
     availableYes: "可配合后续问题",
     availableNo: "未确认",
     ownerNotes: "处理人备注",
@@ -289,7 +292,7 @@ const state = {
   tickets: [],
   selectedId: localStorage.getItem(selectedKey) || null,
   language: localStorage.getItem(languageKey) || "zh",
-  adminPasscode: sessionStorage.getItem(adminPasscodeKey) || "",
+  adminPasscode: "",
   filters: {
     search: "",
     status: "all",
@@ -395,12 +398,12 @@ function defaultSiteConfig() {
       }
     },
     categories: [
-      option("Network", "Network", "网络"),
-      option("Computer", "Computer", "电脑"),
-      option("Account", "Account", "账号"),
-      option("Software", "Software", "软件"),
-      option("Hardware", "Hardware", "硬件"),
-      option("Data or report", "Data or report", "数据或报表"),
+      option("Identity check", "Identity check", "身份核验"),
+      option("Address proof", "Address proof", "地址证明"),
+      option("Account access", "Account access", "账号访问"),
+      option("Payment or fee", "Payment or fee", "缴费/费用"),
+      option("Appointment", "Appointment", "预约排队"),
+      option("Document request", "Document request", "文件/证明开具"),
       option("Other", "Other", "其他")
     ],
     priorities: [
@@ -408,6 +411,10 @@ function defaultSiteConfig() {
       option("Normal", "Normal", "普通"),
       option("High", "High", "高")
     ],
+    form: {
+      deadlineEnabled: true,
+      priorityMode: "manual"
+    },
     emergency: {
       enabled: true,
       keywords: ["emergency", "urgent", "asap", "immediately", "911", "紧急", "急需", "立即", "马上"]
@@ -467,6 +474,7 @@ function mergeConfig(base, override) {
     ad: { ...base.ad, ...(override.ad || {}) },
     strictness: mergeStrictness(base.strictness, override.strictness),
     admin: { ...base.admin, ...(override.admin || {}) },
+    form: { ...base.form, ...(override.form || {}) },
     emergency: { ...base.emergency, ...(override.emergency || {}) },
     validation: { ...base.validation, ...(override.validation || {}) },
     security: { ...base.security, ...(override.security || {}) },
@@ -496,6 +504,7 @@ function applyConfig() {
   populateSelect(document.querySelector("#category"), siteConfig.categories, true);
   populateSelect(document.querySelector("#priority"), siteConfig.priorities, true);
   populateSelect(elements.priorityFilter, siteConfig.priorities, false, true);
+  applyFormConfig();
   applyValidationConfig();
   applyStrictnessConfig();
   applyLanguage();
@@ -512,6 +521,20 @@ function applyValidationConfig() {
   setNumberAttribute("#tried", "maxlength", validation.maxTextLength);
   setNumberAttribute("#reference", "minlength", validation.referenceMinLength);
   setNumberAttribute("#reference", "maxlength", validation.maxTextLength);
+}
+
+function applyFormConfig() {
+  const deadlineEnabled = siteConfig.form?.deadlineEnabled !== false;
+  setFieldRequirement("neededBy", deadlineEnabled);
+  const priorityField = document.querySelector("#priority");
+  const priorityLabel = priorityField?.closest("label");
+  const manualPriority = siteConfig.form?.priorityMode !== "category";
+  if (priorityField) {
+    priorityField.required = manualPriority;
+    priorityField.disabled = !manualPriority;
+    if (priorityLabel) priorityLabel.hidden = !manualPriority;
+    if (!manualPriority) priorityField.value = "";
+  }
 }
 
 function setNumberAttribute(selector, attribute, value) {
@@ -622,7 +645,7 @@ function bindEvents() {
   elements.adminPasscode.value = state.adminPasscode;
   elements.adminPasscode.addEventListener("input", (event) => {
     state.adminPasscode = event.target.value.trim();
-    sessionStorage.setItem(adminPasscodeKey, state.adminPasscode);
+    renderQueue();
   });
 
   elements.tabs.forEach((tab) => {
@@ -778,7 +801,7 @@ async function createTicket(event) {
     contact: clean(data.get("contact")),
     team: clean(data.get("team")),
     category: clean(data.get("category")),
-    priority: clean(data.get("priority")),
+    priority: ticketPriorityForCategory(clean(data.get("category")), clean(data.get("priority"))),
     neededBy: clean(data.get("neededBy")),
     summary: clean(data.get("summary")),
     details: clean(data.get("details")),
@@ -859,7 +882,8 @@ function createTicketButton(ticket) {
   node.classList.toggle("active", ticket.id === state.selectedId);
   node.querySelector(".ticket-id").textContent = ticket.id;
   node.querySelector(".ticket-summary").textContent = ticket.summary;
-  node.querySelector(".ticket-meta").textContent = `${ticket.requester} · ${displayCategory(ticket.category)} · ${t("due")} ${formatDate(ticket.neededBy)}`;
+  const requester = canShowPrivateTicketData() ? ticket.requester : maskPrivateValue(ticket.requester);
+  node.querySelector(".ticket-meta").textContent = `${requester} · ${displayCategory(ticket.category)} · ${ticketDueText(ticket)}`;
 
   const badge = node.querySelector(".badge");
   badge.textContent = `${displayPriority(ticket.priority)} / ${displayStatus(ticket.status)}`;
@@ -905,16 +929,16 @@ function renderDetail() {
   const grid = document.createElement("section");
   grid.className = "detail-grid";
   grid.append(
-    fieldBox(t("requesterField"), `${ticket.requester} (${ticket.contact})`),
-    fieldBox(t("verifiedPhoneField"), ticket.phone || "Not provided"),
-    fieldBox(t("identityField"), ticket.identityId || "Not provided"),
-    fieldBox(t("orgCodeField"), ticket.orgCode || "Not provided"),
-    fieldBox(t("teamField"), ticket.team),
+    privateFieldBox(t("requesterField"), `${ticket.requester} (${ticket.contact})`),
+    privateFieldBox(t("verifiedPhoneField"), ticket.phone || "Not provided"),
+    privateFieldBox(t("identityField"), ticket.identityId || "Not provided"),
+    privateFieldBox(t("orgCodeField"), ticket.orgCode || "Not provided"),
+    privateFieldBox(t("teamField"), ticket.team),
     fieldBox(t("category"), displayCategory(ticket.category)),
-    fieldBox(t("neededByField"), formatDate(ticket.neededBy)),
-    fieldBox(t("detailsField"), ticket.details),
-    fieldBox(t("triedField"), ticket.tried),
-    fieldBox(t("referenceField"), ticket.reference),
+    fieldBox(t("neededByField"), displayTicketDate(ticket.neededBy)),
+    privateFieldBox(t("detailsField"), ticket.details),
+    privateFieldBox(t("triedField"), ticket.tried),
+    privateFieldBox(t("referenceField"), ticket.reference),
     fieldBox(t("availabilityField"), ticket.available ? t("availableYes") : t("availableNo"))
   );
   hardCompanyDetailBoxes(ticket).forEach((box) => grid.append(box));
@@ -936,8 +960,9 @@ function renderDetail() {
   notes.className = "notes-box";
   notes.textContent = t("ownerNotes");
   const textarea = document.createElement("textarea");
-  textarea.value = ticket.ownerNotes || "";
+  textarea.value = canShowPrivateTicketData() ? ticket.ownerNotes || "" : "";
   textarea.placeholder = t("ownerNotesPlaceholder");
+  textarea.disabled = !canShowPrivateTicketData();
   textarea.addEventListener("input", (event) => updateNotes(ticket.id, event.target.value));
   notes.append(textarea);
   fragment.append(notes);
@@ -945,18 +970,23 @@ function renderDetail() {
   elements.ticketDetail.append(fragment);
 }
 
-function fieldBox(label, value) {
+function fieldBox(label, value, isPrivateHidden = false) {
   const box = document.createElement("div");
   box.className = "field-box";
+  box.classList.toggle("privacy-masked", isPrivateHidden);
 
   const labelEl = document.createElement("span");
   labelEl.textContent = label;
 
   const valueEl = document.createElement("p");
-  valueEl.textContent = value;
+  valueEl.textContent = isPrivateHidden ? t("privacyHidden") : value;
 
   box.append(labelEl, valueEl);
   return box;
+}
+
+function privateFieldBox(label, value) {
+  return fieldBox(label, value, !canShowPrivateTicketData());
 }
 
 function hardCompanyDetailBoxes(ticket) {
@@ -971,7 +1001,17 @@ function hardCompanyDetailBoxes(ticket) {
   ];
   return fields
     .filter(([fieldName]) => ticket[fieldName])
-    .map(([fieldName, label]) => fieldBox(label, ticket[fieldName]));
+    .map(([fieldName, label]) => privateFieldBox(label, ticket[fieldName]));
+}
+
+function canShowPrivateTicketData() {
+  return /^[A-Za-z0-9]{4,8}$/.test(state.adminPasscode.trim());
+}
+
+function maskPrivateValue(value) {
+  const text = String(value || "").trim();
+  if (!text) return t("privacyHidden");
+  return text.length <= 2 ? "*".repeat(text.length) : `${text.slice(0, 1)}***`;
 }
 
 async function updateTicket(id, patch) {
@@ -1152,6 +1192,20 @@ function displayPriority(priority) {
   return displayConfiguredOption(siteConfig.priorities, priority) || {
     Urgent: t("priorityUrgentBlocked")
   }[priority] || priority;
+}
+
+function ticketPriorityForCategory(category, fallbackPriority = "") {
+  if (siteConfig.form?.priorityMode !== "category") return fallbackPriority;
+  const match = (siteConfig.categories || []).find((item) => item.value === category);
+  return match?.priority || "Normal";
+}
+
+function ticketDueText(ticket) {
+  return ticket.neededBy ? `${t("due")} ${formatDate(ticket.neededBy)}` : t("noDeadline");
+}
+
+function displayTicketDate(dateString) {
+  return dateString ? formatDate(dateString) : t("noDeadline");
 }
 
 function displayCategory(category) {

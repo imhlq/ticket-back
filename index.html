@@ -102,40 +102,40 @@
             </fieldset>
 
             <fieldset class="hard-verification-box" id="hardVerificationBox">
-              <legend data-i18n="hardVerificationTitle">Company documentation</legend>
-              <p data-i18n="hardVerificationIntro">For strict mode, the requester must provide organization-level public records before asking for work.</p>
-              <p class="privacy-note" data-i18n="privacyNotice">Do not submit government IDs, private certificates, passwords, or sensitive personal information. Use public business records and keep only what is necessary.</p>
+              <legend data-i18n="hardVerificationTitle">Proof burden</legend>
+              <p data-i18n="hardVerificationIntro">For strict mode, the requester must provide the kind of proof and repeated context institutions often demand from individuals.</p>
+              <p class="privacy-note" data-i18n="privacyNotice">Do not submit full government IDs, passwords, private certificates, or sensitive personal files. Use references, redacted proofs, and only what is necessary.</p>
 
               <div class="form-grid">
                 <label for="companyLegalName">
-                  <span data-i18n="companyLegalName">Legal entity name</span>
-                  <input id="companyLegalName" name="companyLegalName" minlength="2" maxlength="120" data-i18n-placeholder="companyLegalNamePlaceholder" placeholder="Registered company or organization name">
+                  <span data-i18n="companyLegalName">Full legal name</span>
+                  <input id="companyLegalName" name="companyLegalName" minlength="2" maxlength="120" data-i18n-placeholder="companyLegalNamePlaceholder" placeholder="Name exactly as shown on the record">
                 </label>
                 <label for="companyRegistrationNumber">
-                  <span data-i18n="companyRegistrationNumber">Registration number</span>
-                  <input id="companyRegistrationNumber" name="companyRegistrationNumber" minlength="4" maxlength="64" data-i18n-placeholder="companyRegistrationPlaceholder" placeholder="Company registration or certificate number">
+                  <span data-i18n="companyRegistrationNumber">Identity document type</span>
+                  <input id="companyRegistrationNumber" name="companyRegistrationNumber" minlength="4" maxlength="64" data-i18n-placeholder="companyRegistrationPlaceholder" placeholder="ID card, passport, student card, permit">
                 </label>
                 <label for="taxId">
-                  <span data-i18n="taxId">Tax ID</span>
-                  <input id="taxId" name="taxId" minlength="4" maxlength="64" data-i18n-placeholder="taxIdPlaceholder" placeholder="Taxpayer ID or equivalent">
+                  <span data-i18n="taxId">Document/reference number</span>
+                  <input id="taxId" name="taxId" minlength="4" maxlength="64" data-i18n-placeholder="taxIdPlaceholder" placeholder="Redacted document number or case reference">
                 </label>
                 <label for="certificateAuthority">
-                  <span data-i18n="certificateAuthority">Certificate authority</span>
-                  <input id="certificateAuthority" name="certificateAuthority" minlength="3" maxlength="120" data-i18n-placeholder="certificateAuthorityPlaceholder" placeholder="Issuing authority">
+                  <span data-i18n="certificateAuthority">Issuing office</span>
+                  <input id="certificateAuthority" name="certificateAuthority" minlength="3" maxlength="120" data-i18n-placeholder="certificateAuthorityPlaceholder" placeholder="School, agency, bank, platform, office">
                 </label>
                 <label for="certificateUrl">
-                  <span data-i18n="certificateUrl">Certificate link</span>
-                  <input id="certificateUrl" name="certificateUrl" minlength="8" maxlength="300" data-i18n-placeholder="certificateUrlPlaceholder" placeholder="Public certificate, license, or registry URL">
+                  <span data-i18n="certificateUrl">Proof document link</span>
+                  <input id="certificateUrl" name="certificateUrl" minlength="8" maxlength="300" data-i18n-placeholder="certificateUrlPlaceholder" placeholder="Redacted proof, screenshot, or previous notice URL">
                 </label>
                 <label for="authorizedRepresentative">
-                  <span data-i18n="authorizedRepresentative">Authorized representative</span>
-                  <input id="authorizedRepresentative" name="authorizedRepresentative" minlength="2" maxlength="120" data-i18n-placeholder="authorizedRepresentativePlaceholder" placeholder="Person authorized to make this request">
+                  <span data-i18n="authorizedRepresentative">Relationship to request</span>
+                  <input id="authorizedRepresentative" name="authorizedRepresentative" minlength="2" maxlength="120" data-i18n-placeholder="authorizedRepresentativePlaceholder" placeholder="Self, family member, tenant, student, customer">
                 </label>
               </div>
 
               <label for="authorizationReference">
-                <span data-i18n="authorizationReference">Authorization reference</span>
-                <textarea id="authorizationReference" name="authorizationReference" minlength="20" maxlength="1500" rows="4" data-i18n-placeholder="authorizationReferencePlaceholder" placeholder="Explain why this person and organization are authorized to ask for this work."></textarea>
+                <span data-i18n="authorizationReference">Declaration and authorization</span>
+                <textarea id="authorizationReference" name="authorizationReference" minlength="20" maxlength="1500" rows="4" data-i18n-placeholder="authorizationReferencePlaceholder" placeholder="Explain why this request is valid, who authorized it, and which previous ticket or notice it relates to."></textarea>
               </label>
             </fieldset>
 
@@ -156,12 +156,12 @@
                 <span data-i18n="category">Category</span>
                 <select id="category" name="category" required>
                   <option value="" data-i18n="chooseOne">Choose one</option>
-                  <option value="Network" data-i18n="catNetwork">Network</option>
-                  <option value="Computer" data-i18n="catComputer">Computer</option>
-                  <option value="Account" data-i18n="catAccount">Account</option>
-                  <option value="Software" data-i18n="catSoftware">Software</option>
-                  <option value="Hardware" data-i18n="catHardware">Hardware</option>
-                  <option value="Data or report" data-i18n="catData">Data or report</option>
+                  <option value="Identity check" data-i18n="catNetwork">Identity check</option>
+                  <option value="Address proof" data-i18n="catComputer">Address proof</option>
+                  <option value="Account access" data-i18n="catAccount">Account access</option>
+                  <option value="Payment or fee" data-i18n="catSoftware">Payment or fee</option>
+                  <option value="Appointment" data-i18n="catHardware">Appointment</option>
+                  <option value="Document request" data-i18n="catData">Document request</option>
                   <option value="Other" data-i18n="catOther">Other</option>
                 </select>
               </label>
