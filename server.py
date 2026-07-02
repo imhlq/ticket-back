@@ -20,10 +20,7 @@ PUBLIC_EXTENSIONS = {".html", ".css", ".js", ".ico", ".png", ".jpg", ".jpeg", ".
 STATUSES = {"New", "Accepted", "Waiting", "Done"}
 DEFAULT_PRIORITIES = {"Low", "Normal", "High"}
 DEFAULT_CATEGORIES = {"Network", "Computer", "Account", "Software", "Hardware", "Data or report", "Other"}
-REQUIRED_FIELDS = {
-    "phone",
-    "identityId",
-    "orgCode",
+BASE_REQUIRED_FIELDS = {
     "requester",
     "contact",
     "team",
@@ -34,6 +31,16 @@ REQUIRED_FIELDS = {
     "details",
     "tried",
     "reference",
+}
+VERIFICATION_FIELDS = {"phone", "identityId", "orgCode"}
+COMPANY_FIELDS = {
+    "companyLegalName",
+    "companyRegistrationNumber",
+    "taxId",
+    "certificateAuthority",
+    "certificateUrl",
+    "authorizedRepresentative",
+    "authorizationReference",
 }
 PHONE_RE = re.compile(r"^[+0-9 ()-]{7,24}$")
 ID_RE = re.compile(r"^[A-Za-z0-9-]{4,32}$")
@@ -48,6 +55,37 @@ DEFAULT_CONFIG = {
     "emergency": {
         "enabled": True,
         "keywords": ["emergency", "urgent", "asap", "immediately", "911", "紧急", "急需", "立即", "马上"],
+    },
+    "strictness": {
+        "activeLevel": "middle",
+        "levels": {
+            "easy": {
+                "requireChallenge": False,
+                "requireVerificationConfirm": False,
+                "verificationFields": [],
+                "companyFields": [],
+            },
+            "middle": {
+                "requireChallenge": True,
+                "requireVerificationConfirm": True,
+                "verificationFields": ["phone", "identityId", "orgCode"],
+                "companyFields": [],
+            },
+            "hard": {
+                "requireChallenge": True,
+                "requireVerificationConfirm": True,
+                "verificationFields": ["phone", "identityId", "orgCode"],
+                "companyFields": [
+                    "companyLegalName",
+                    "companyRegistrationNumber",
+                    "taxId",
+                    "certificateAuthority",
+                    "certificateUrl",
+                    "authorizedRepresentative",
+                    "authorizationReference",
+                ],
+            },
+        },
     },
     "validation": {
         "summaryMinLength": 12,
@@ -104,13 +142,16 @@ class TicketStore:
 
     def create(self, payload):
         config = load_config()
-        clean_payload = {key: clean(payload.get(key)) for key in REQUIRED_FIELDS}
+        strictness = active_strictness_level(config)
+        required_fields = required_payload_fields(strictness)
+        clean_payload = {key: clean(payload.get(key)) for key in required_fields}
         missing = [key for key, value in clean_payload.items() if not value]
         if missing:
             raise ValueError(f"Missing required fields: {', '.join(sorted(missing))}")
 
-        validate_challenge(payload, config)
-        validate_payload(clean_payload, payload, config)
+        if strictness.get("requireChallenge"):
+            validate_challenge(payload, config)
+        validate_payload(clean_payload, payload, config, strictness)
 
         priority = clean_payload["priority"]
         if priority not in config_values(config, "priorities", DEFAULT_PRIORITIES):
@@ -176,6 +217,13 @@ class TicketStore:
             "details",
             "tried",
             "reference",
+            "companyLegalName",
+            "companyRegistrationNumber",
+            "taxId",
+            "certificateAuthority",
+            "certificateUrl",
+            "authorizedRepresentative",
+            "authorizationReference",
             "neededBy",
             "ownerNotes",
             "notEmergency",
@@ -213,6 +261,7 @@ def load_config():
         **DEFAULT_CONFIG,
         **config,
         "emergency": {**DEFAULT_CONFIG["emergency"], **config.get("emergency", {})},
+        "strictness": merge_strictness(DEFAULT_CONFIG["strictness"], config.get("strictness", {})),
         "validation": {**DEFAULT_CONFIG["validation"], **config.get("validation", {})},
         "security": {**DEFAULT_CONFIG["security"], **config.get("security", {})},
     }
@@ -221,6 +270,30 @@ def load_config():
         **config.get("security", {}).get("rateLimits", {}),
     }
     return merged
+
+
+def merge_strictness(base, override):
+    if not isinstance(override, dict):
+        return base
+    levels = {name: dict(value) for name, value in base.get("levels", {}).items()}
+    for level_name, level_config in override.get("levels", {}).items():
+        if isinstance(level_config, dict):
+            levels[level_name] = {**levels.get(level_name, {}), **level_config}
+    return {**base, **override, "levels": levels}
+
+
+def active_strictness_level(config):
+    strictness = config.get("strictness", {})
+    levels = strictness.get("levels", {})
+    active_level = strictness.get("activeLevel", "middle")
+    return levels.get(active_level) or levels.get("middle") or DEFAULT_CONFIG["strictness"]["levels"]["middle"]
+
+
+def required_payload_fields(strictness):
+    fields = set(BASE_REQUIRED_FIELDS)
+    fields.update(field for field in strictness.get("verificationFields", []) if field in VERIFICATION_FIELDS)
+    fields.update(field for field in strictness.get("companyFields", []) if field in COMPANY_FIELDS)
+    return fields
 
 
 def config_int(config, section, key, fallback):
@@ -294,16 +367,17 @@ def validate_challenge(payload, config):
         raise ValueError("Please spend a little more time reviewing the form before submitting.")
 
 
-def validate_payload(values, payload, config):
+def validate_payload(values, payload, config, strictness):
     validation = config.get("validation", {})
     if clean(payload.get("companyWebsite")):
         raise ValueError("Spam check failed.")
-    if not PHONE_RE.match(values["phone"]):
+    if "phone" in values and not PHONE_RE.match(values["phone"]):
         raise ValueError("Phone number must be 7-24 characters and use only digits, spaces, +, -, or parentheses.")
-    if not ID_RE.match(values["identityId"]):
+    if "identityId" in values and not ID_RE.match(values["identityId"]):
         raise ValueError("Work or school ID must be 4-32 letters, numbers, or hyphens.")
-    if not ORG_RE.match(values["orgCode"]):
+    if "orgCode" in values and not ORG_RE.match(values["orgCode"]):
         raise ValueError("Department code must be 3-24 letters, numbers, or hyphens.")
+    validate_company_fields(values)
     max_text_length = config_int(config, "validation", "maxTextLength", 1500)
     max_summary_length = config_int(config, "validation", "maxSummaryLength", 90)
     if len(values["summary"]) > max_summary_length:
@@ -327,11 +401,34 @@ def validate_payload(values, payload, config):
         raise ValueError("Needed by cannot be in the past.")
     if not payload.get("available"):
         raise ValueError("You must confirm availability for follow-up questions.")
-    if not payload.get("verificationConfirm"):
+    if strictness.get("requireVerificationConfirm") and not payload.get("verificationConfirm"):
         raise ValueError("You must confirm the verification details are accurate.")
     if not payload.get("notEmergency"):
         raise ValueError("Emergency or urgent requests are not accepted here.")
     reject_emergency_text(values, config)
+
+
+def validate_company_fields(values):
+    simple_fields = [
+        "companyLegalName",
+        "companyRegistrationNumber",
+        "taxId",
+        "certificateAuthority",
+        "authorizedRepresentative",
+    ]
+    for field in simple_fields:
+        if field in values and len(values[field]) > 120:
+            raise ValueError(f"{field} is too long.")
+        if field in values and len(values[field]) < 2:
+            raise ValueError(f"{field} is too short.")
+    if "certificateUrl" in values and len(values["certificateUrl"]) > 300:
+        raise ValueError("Certificate link is too long.")
+    if "certificateUrl" in values and not re.match(r"^https?://.{6,}$", values["certificateUrl"]):
+        raise ValueError("Certificate link must be a valid http or https URL.")
+    if "authorizationReference" in values and len(values["authorizationReference"]) > 1500:
+        raise ValueError("Authorization reference is too long.")
+    if "authorizationReference" in values and len(values["authorizationReference"]) < 20:
+        raise ValueError("Authorization reference must be at least 20 characters.")
 
 
 def reject_emergency_text(values, config):

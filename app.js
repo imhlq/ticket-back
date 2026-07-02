@@ -34,6 +34,22 @@ const translations = {
     reset: "Reset",
     verificationTitle: "Requester verification",
     verificationIntro: "Verify your phone and internal ID before the request form can be submitted.",
+    hardVerificationTitle: "Company documentation",
+    hardVerificationIntro: "For strict mode, the requester must provide organization-level records before asking for work.",
+    companyLegalName: "Legal entity name",
+    companyLegalNamePlaceholder: "Registered company or organization name",
+    companyRegistrationNumber: "Registration number",
+    companyRegistrationPlaceholder: "Company registration or certificate number",
+    taxId: "Tax ID",
+    taxIdPlaceholder: "Taxpayer ID or equivalent",
+    certificateAuthority: "Certificate authority",
+    certificateAuthorityPlaceholder: "Issuing authority",
+    certificateUrl: "Certificate link",
+    certificateUrlPlaceholder: "Public certificate, license, or registry URL",
+    authorizedRepresentative: "Authorized representative",
+    authorizedRepresentativePlaceholder: "Person authorized to make this request",
+    authorizationReference: "Authorization reference",
+    authorizationReferencePlaceholder: "Explain why this person and organization are authorized to ask for this work.",
     phone: "Phone number",
     phonePlaceholder: "+1 555 010 1234",
     identityId: "Work or school ID",
@@ -114,6 +130,13 @@ const translations = {
     verifiedPhoneField: "Verified phone",
     identityField: "Internal ID",
     orgCodeField: "Department code",
+    companyLegalNameField: "Legal entity",
+    companyRegistrationNumberField: "Registration number",
+    taxIdField: "Tax ID",
+    certificateAuthorityField: "Certificate authority",
+    certificateUrlField: "Certificate link",
+    authorizedRepresentativeField: "Authorized representative",
+    authorizationReferenceField: "Authorization reference",
     availableYes: "Available for follow-up",
     availableNo: "Not confirmed",
     ownerNotes: "Owner notes",
@@ -146,6 +169,22 @@ const translations = {
     reset: "重置",
     verificationTitle: "请求人验证",
     verificationIntro: "提交前必须验证手机号和内部 ID，并确认信息真实完整。",
+    hardVerificationTitle: "公司/机构文件",
+    hardVerificationIntro: "严格模式下，请求人必须提供组织层面的证明材料，才能提出请求。",
+    companyLegalName: "法定主体名称",
+    companyLegalNamePlaceholder: "注册公司或机构名称",
+    companyRegistrationNumber: "注册/证书编号",
+    companyRegistrationPlaceholder: "公司注册号或证书编号",
+    taxId: "税号",
+    taxIdPlaceholder: "纳税人识别号或等效编号",
+    certificateAuthority: "发证机关",
+    certificateAuthorityPlaceholder: "证书或执照的签发机关",
+    certificateUrl: "证书链接",
+    certificateUrlPlaceholder: "公开证书、执照或登记链接",
+    authorizedRepresentative: "授权代表",
+    authorizedRepresentativePlaceholder: "被授权提出此请求的人",
+    authorizationReference: "授权说明",
+    authorizationReferencePlaceholder: "说明该人员和组织为什么有权提出此请求。",
     phone: "手机号码",
     phonePlaceholder: "+86 138 0000 0000",
     identityId: "工号或学号",
@@ -226,6 +265,13 @@ const translations = {
     verifiedPhoneField: "已验证手机号",
     identityField: "内部 ID",
     orgCodeField: "部门代码",
+    companyLegalNameField: "法定主体",
+    companyRegistrationNumberField: "注册/证书编号",
+    taxIdField: "税号",
+    certificateAuthorityField: "发证机关",
+    certificateUrlField: "证书链接",
+    authorizedRepresentativeField: "授权代表",
+    authorizationReferenceField: "授权说明",
     availableYes: "可配合后续问题",
     availableNo: "未确认",
     ownerNotes: "处理人备注",
@@ -254,6 +300,11 @@ const elements = {
   form: document.querySelector("#ticketForm"),
   formStatus: document.querySelector("#formStatus"),
   resetForm: document.querySelector("#resetForm"),
+  verificationBox: document.querySelector(".verification-box"),
+  hardVerificationBox: document.querySelector("#hardVerificationBox"),
+  challengeRow: document.querySelector(".challenge-row"),
+  challengeAnswer: document.querySelector("#challengeAnswer"),
+  verificationConfirm: document.querySelector("#verificationConfirm"),
   ticketList: document.querySelector("#ticketList"),
   ticketDetail: document.querySelector("#ticketDetail"),
   adModal: document.querySelector("#adModal"),
@@ -307,6 +358,37 @@ function defaultSiteConfig() {
       },
       url: ""
     },
+    strictness: {
+      activeLevel: "middle",
+      levels: {
+        easy: {
+          requireChallenge: false,
+          requireVerificationConfirm: false,
+          verificationFields: [],
+          companyFields: []
+        },
+        middle: {
+          requireChallenge: true,
+          requireVerificationConfirm: true,
+          verificationFields: ["phone", "identityId", "orgCode"],
+          companyFields: []
+        },
+        hard: {
+          requireChallenge: true,
+          requireVerificationConfirm: true,
+          verificationFields: ["phone", "identityId", "orgCode"],
+          companyFields: [
+            "companyLegalName",
+            "companyRegistrationNumber",
+            "taxId",
+            "certificateAuthority",
+            "certificateUrl",
+            "authorizedRepresentative",
+            "authorizationReference"
+          ]
+        }
+      }
+    },
     categories: [
       option("Network", "Network", "网络"),
       option("Computer", "Computer", "电脑"),
@@ -351,7 +433,9 @@ function option(value, en, zh) {
 
 async function initialize() {
   await loadConfig();
-  await refreshChallenge();
+  if (activeStrictnessLevel().requireChallenge) {
+    await refreshChallenge();
+  }
   await loadTickets();
 }
 
@@ -373,11 +457,25 @@ function mergeConfig(base, override) {
     ...override,
     text: { ...base.text, ...(override.text || {}) },
     ad: { ...base.ad, ...(override.ad || {}) },
+    strictness: mergeStrictness(base.strictness, override.strictness),
     emergency: { ...base.emergency, ...(override.emergency || {}) },
     validation: { ...base.validation, ...(override.validation || {}) },
     security: { ...base.security, ...(override.security || {}) },
     categories: Array.isArray(override.categories) ? override.categories : base.categories,
     priorities: Array.isArray(override.priorities) ? override.priorities : base.priorities
+  };
+}
+
+function mergeStrictness(base, override) {
+  if (!override || typeof override !== "object") return base;
+  const levels = { ...base.levels };
+  Object.entries(override.levels || {}).forEach(([levelName, levelConfig]) => {
+    levels[levelName] = { ...(levels[levelName] || {}), ...(levelConfig || {}) };
+  });
+  return {
+    ...base,
+    ...override,
+    levels
   };
 }
 
@@ -390,6 +488,7 @@ function applyConfig() {
   populateSelect(document.querySelector("#priority"), siteConfig.priorities, true);
   populateSelect(elements.priorityFilter, siteConfig.priorities, false, true);
   applyValidationConfig();
+  applyStrictnessConfig();
   applyLanguage();
   applyAdConfig();
 }
@@ -409,6 +508,59 @@ function applyValidationConfig() {
 function setNumberAttribute(selector, attribute, value) {
   if (!Number.isFinite(Number(value))) return;
   document.querySelector(selector).setAttribute(attribute, String(value));
+}
+
+function applyStrictnessConfig() {
+  const level = activeStrictnessLevel();
+  const verificationFields = new Set(level.verificationFields || []);
+  const companyFields = new Set(level.companyFields || []);
+  const showVerification = level.requireChallenge || level.requireVerificationConfirm || verificationFields.size > 0;
+
+  elements.verificationBox.hidden = !showVerification;
+  elements.challengeRow.hidden = !level.requireChallenge;
+  elements.challengeAnswer.required = !!level.requireChallenge;
+  elements.challengeAnswer.disabled = !level.requireChallenge;
+  elements.verificationConfirm.required = !!level.requireVerificationConfirm;
+  elements.verificationConfirm.disabled = !level.requireVerificationConfirm;
+  elements.verificationConfirm.closest("label").hidden = !level.requireVerificationConfirm;
+
+  ["phone", "identityId", "orgCode"].forEach((fieldName) => {
+    setFieldRequirement(fieldName, verificationFields.has(fieldName));
+  });
+
+  elements.hardVerificationBox.hidden = companyFields.size === 0;
+  hardCompanyFields().forEach((fieldName) => {
+    setFieldRequirement(fieldName, companyFields.has(fieldName));
+  });
+}
+
+function activeStrictnessLevel() {
+  const strictness = siteConfig.strictness || {};
+  const levels = strictness.levels || {};
+  const activeLevel = strictness.activeLevel || "middle";
+  return levels[activeLevel] || levels.middle || defaultSiteConfig().strictness.levels.middle;
+}
+
+function hardCompanyFields() {
+  return [
+    "companyLegalName",
+    "companyRegistrationNumber",
+    "taxId",
+    "certificateAuthority",
+    "certificateUrl",
+    "authorizedRepresentative",
+    "authorizationReference"
+  ];
+}
+
+function setFieldRequirement(fieldName, isRequired) {
+  const field = document.querySelector(`[name="${fieldName}"]`);
+  if (!field) return;
+  const label = field.closest("label");
+  field.required = isRequired;
+  field.disabled = !isRequired;
+  if (label) label.hidden = !isRequired;
+  if (!isRequired) field.value = "";
 }
 
 function populateSelect(select, options, includePlaceholder, includeAll = false) {
@@ -476,7 +628,9 @@ function bindEvents() {
   elements.resetForm.addEventListener("click", () => {
     elements.form.reset();
     setMinimumDate();
-    refreshChallenge();
+    if (activeStrictnessLevel().requireChallenge) {
+      refreshChallenge();
+    }
     setStatus("");
   });
 
@@ -540,6 +694,12 @@ function applyLanguage() {
 }
 
 async function refreshChallenge() {
+  if (!activeStrictnessLevel().requireChallenge) {
+    challenge = { id: "", code: "" };
+    elements.challengeCode.textContent = "------";
+    elements.challengeAnswer.value = "";
+    return;
+  }
   try {
     const response = await fetch("/api/challenge");
     if (!response.ok) throw new Error(t("loadError"));
@@ -610,7 +770,14 @@ async function createTicket(event) {
     details: clean(data.get("details")),
     tried: clean(data.get("tried")),
     reference: clean(data.get("reference")),
-    available: data.get("available") === "on"
+    available: data.get("available") === "on",
+    companyLegalName: clean(data.get("companyLegalName")),
+    companyRegistrationNumber: clean(data.get("companyRegistrationNumber")),
+    taxId: clean(data.get("taxId")),
+    certificateAuthority: clean(data.get("certificateAuthority")),
+    certificateUrl: clean(data.get("certificateUrl")),
+    authorizedRepresentative: clean(data.get("authorizedRepresentative")),
+    authorizationReference: clean(data.get("authorizationReference"))
   };
 
   try {
@@ -627,7 +794,9 @@ async function createTicket(event) {
     localStorage.setItem(selectedKey, ticket.id);
     elements.form.reset();
     setMinimumDate();
-    await refreshChallenge();
+    if (activeStrictnessLevel().requireChallenge) {
+      await refreshChallenge();
+    }
     setStatus(t("ticketCreated", { id: ticket.id }));
     switchView("queue");
     render();
@@ -734,6 +903,7 @@ function renderDetail() {
     fieldBox(t("referenceField"), ticket.reference),
     fieldBox(t("availabilityField"), ticket.available ? t("availableYes") : t("availableNo"))
   );
+  hardCompanyDetailBoxes(ticket).forEach((box) => grid.append(box));
   fragment.append(grid);
 
   const actions = document.createElement("div");
@@ -773,6 +943,21 @@ function fieldBox(label, value) {
 
   box.append(labelEl, valueEl);
   return box;
+}
+
+function hardCompanyDetailBoxes(ticket) {
+  const fields = [
+    ["companyLegalName", t("companyLegalNameField")],
+    ["companyRegistrationNumber", t("companyRegistrationNumberField")],
+    ["taxId", t("taxIdField")],
+    ["certificateAuthority", t("certificateAuthorityField")],
+    ["certificateUrl", t("certificateUrlField")],
+    ["authorizedRepresentative", t("authorizedRepresentativeField")],
+    ["authorizationReference", t("authorizationReferenceField")]
+  ];
+  return fields
+    .filter(([fieldName]) => ticket[fieldName])
+    .map(([fieldName, label]) => fieldBox(label, ticket[fieldName]));
 }
 
 async function updateTicket(id, patch) {
@@ -824,7 +1009,14 @@ function filteredTickets() {
       ticket.category,
       ticket.priority,
       ticket.summary,
-      ticket.details
+      ticket.details,
+      ticket.companyLegalName,
+      ticket.companyRegistrationNumber,
+      ticket.taxId,
+      ticket.certificateAuthority,
+      ticket.certificateUrl,
+      ticket.authorizedRepresentative,
+      ticket.authorizationReference
     ].join(" ").toLowerCase();
 
     const matchesSearch = search === "" || searchable.includes(search);

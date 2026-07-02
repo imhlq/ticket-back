@@ -28,7 +28,7 @@ It is not about being rude. It is about making the relationship more equal.
 
 - Chinese-first bilingual interface
 - Required request form before someone can ask for your time
-- Requester verification fields
+- Configurable strictness levels: `easy`, `middle`, and `hard`
 - Ticket queue, status tracking, owner notes, and CSV export
 - Configurable categories, priorities, text, validation rules, and ad placeholder
 - Basic spam resistance and private runtime data protection
@@ -52,6 +52,7 @@ python3 server.py --host 0.0.0.0 --port 8000
 
 Edit `site_config.json` to customize:
 
+- strictness level
 - site title and text
 - categories and priorities
 - ad placeholder content
@@ -59,5 +60,10 @@ Edit `site_config.json` to customize:
 - rate limits
 - emergency keywords
 
-Runtime tickets are stored in `tickets.json`, which is ignored by git.
+Strictness levels:
 
+- `easy`: basic request details, minimal verification
+- `middle`: current default, with phone/internal ID/department code and verification code
+- `hard`: middle level plus company documentation such as legal entity name, registration number, tax ID, certificate authority, certificate link, authorized representative, and authorization reference
+
+Runtime tickets are stored in `tickets.json`, which is ignored by git.

@@ -32,6 +32,37 @@
     },
     "url": ""
   },
+  "strictness": {
+    "activeLevel": "middle",
+    "levels": {
+      "easy": {
+        "requireChallenge": false,
+        "requireVerificationConfirm": false,
+        "verificationFields": [],
+        "companyFields": []
+      },
+      "middle": {
+        "requireChallenge": true,
+        "requireVerificationConfirm": true,
+        "verificationFields": ["phone", "identityId", "orgCode"],
+        "companyFields": []
+      },
+      "hard": {
+        "requireChallenge": true,
+        "requireVerificationConfirm": true,
+        "verificationFields": ["phone", "identityId", "orgCode"],
+        "companyFields": [
+          "companyLegalName",
+          "companyRegistrationNumber",
+          "taxId",
+          "certificateAuthority",
+          "certificateUrl",
+          "authorizedRepresentative",
+          "authorizationReference"
+        ]
+      }
+    }
+  },
   "categories": [
     { "value": "Network", "label": { "en": "Network", "zh": "网络" } },
     { "value": "Computer", "label": { "en": "Computer", "zh": "电脑" } },

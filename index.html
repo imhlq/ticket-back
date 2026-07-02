@@ -107,6 +107,43 @@
               </label>
             </fieldset>
 
+            <fieldset class="hard-verification-box" id="hardVerificationBox">
+              <legend data-i18n="hardVerificationTitle">Company documentation</legend>
+              <p data-i18n="hardVerificationIntro">For strict mode, the requester must provide organization-level records before asking for work.</p>
+
+              <div class="form-grid">
+                <label for="companyLegalName">
+                  <span data-i18n="companyLegalName">Legal entity name</span>
+                  <input id="companyLegalName" name="companyLegalName" minlength="2" maxlength="120" data-i18n-placeholder="companyLegalNamePlaceholder" placeholder="Registered company or organization name">
+                </label>
+                <label for="companyRegistrationNumber">
+                  <span data-i18n="companyRegistrationNumber">Registration number</span>
+                  <input id="companyRegistrationNumber" name="companyRegistrationNumber" minlength="4" maxlength="64" data-i18n-placeholder="companyRegistrationPlaceholder" placeholder="Company registration or certificate number">
+                </label>
+                <label for="taxId">
+                  <span data-i18n="taxId">Tax ID</span>
+                  <input id="taxId" name="taxId" minlength="4" maxlength="64" data-i18n-placeholder="taxIdPlaceholder" placeholder="Taxpayer ID or equivalent">
+                </label>
+                <label for="certificateAuthority">
+                  <span data-i18n="certificateAuthority">Certificate authority</span>
+                  <input id="certificateAuthority" name="certificateAuthority" minlength="3" maxlength="120" data-i18n-placeholder="certificateAuthorityPlaceholder" placeholder="Issuing authority">
+                </label>
+                <label for="certificateUrl">
+                  <span data-i18n="certificateUrl">Certificate link</span>
+                  <input id="certificateUrl" name="certificateUrl" minlength="8" maxlength="300" data-i18n-placeholder="certificateUrlPlaceholder" placeholder="Public certificate, license, or registry URL">
+                </label>
+                <label for="authorizedRepresentative">
+                  <span data-i18n="authorizedRepresentative">Authorized representative</span>
+                  <input id="authorizedRepresentative" name="authorizedRepresentative" minlength="2" maxlength="120" data-i18n-placeholder="authorizedRepresentativePlaceholder" placeholder="Person authorized to make this request">
+                </label>
+              </div>
+
+              <label for="authorizationReference">
+                <span data-i18n="authorizationReference">Authorization reference</span>
+                <textarea id="authorizationReference" name="authorizationReference" minlength="20" maxlength="1500" rows="4" data-i18n-placeholder="authorizationReferencePlaceholder" placeholder="Explain why this person and organization are authorized to ask for this work."></textarea>
+              </label>
+            </fieldset>
+
             <div class="form-grid">
               <label for="requester">
                 <span data-i18n="requester">Your name</span>
