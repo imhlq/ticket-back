@@ -258,7 +258,8 @@ h3 {
 
 form,
 .queue-layout,
-.filters {
+.filters,
+.admin-gate {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.92);
@@ -306,6 +307,15 @@ form {
   margin: 0;
   color: var(--muted);
   line-height: 1.45;
+}
+
+.hard-verification-box .privacy-note {
+  padding: 12px;
+  border: 1px solid rgba(179, 107, 18, 0.24);
+  border-radius: 8px;
+  background: #fff;
+  color: #6b4210;
+  font-weight: 800;
 }
 
 .form-grid {
@@ -631,6 +641,31 @@ textarea {
   color: #105d52;
 }
 
+.admin-gate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 240px);
+  gap: 18px;
+  align-items: end;
+  margin-bottom: 16px;
+  padding: 18px;
+}
+
+.admin-gate h3,
+.admin-gate p {
+  margin: 0;
+}
+
+.admin-gate h3 {
+  color: var(--nav);
+  font-size: 1rem;
+}
+
+.admin-gate p {
+  margin-top: 6px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
 .notes-box {
   display: grid;
   gap: 10px;
@@ -721,6 +756,7 @@ textarea {
 
   .form-grid,
   .filters,
+  .admin-gate,
   .queue-layout {
     grid-template-columns: 1fr;
   }

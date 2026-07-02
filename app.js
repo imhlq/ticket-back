@@ -1,5 +1,6 @@
 const selectedKey = "personal-request-desk:selected";
 const languageKey = "personal-request-desk:language";
+const adminPasscodeKey = "personal-request-desk:admin-passcode";
 const statuses = ["New", "Accepted", "Waiting", "Done"];
 const noteTimers = new Map();
 let challenge = { id: "", code: "" };
@@ -33,9 +34,10 @@ const translations = {
     newRequest: "New request",
     reset: "Reset",
     verificationTitle: "Requester verification",
-    verificationIntro: "Verify your phone and internal ID before the request form can be submitted.",
+    verificationIntro: "Provide basic contact verification before the request form can be submitted.",
     hardVerificationTitle: "Company documentation",
-    hardVerificationIntro: "For strict mode, the requester must provide organization-level records before asking for work.",
+    hardVerificationIntro: "For strict mode, the requester must provide organization-level public records before asking for work.",
+    privacyNotice: "Do not submit government IDs, private certificates, passwords, or sensitive personal information. Use public business records and keep only what is necessary.",
     companyLegalName: "Legal entity name",
     companyLegalNamePlaceholder: "Registered company or organization name",
     companyRegistrationNumber: "Registration number",
@@ -52,15 +54,15 @@ const translations = {
     authorizationReferencePlaceholder: "Explain why this person and organization are authorized to ask for this work.",
     phone: "Phone number",
     phonePlaceholder: "+1 555 010 1234",
-    identityId: "Work or school ID",
-    identityPlaceholder: "Employee or student ID",
+    identityId: "Internal reference ID",
+    identityPlaceholder: "Employee, team, or case ID",
     orgCode: "Department code",
     orgPlaceholder: "Team or office code",
     verificationCode: "Verification code",
     refreshCode: "Refresh Code",
     typeCode: "Type the verification code",
     codePlaceholder: "6-digit code",
-    verificationConfirm: "I confirm my phone, ID, and request details are accurate.",
+    verificationConfirm: "I confirm the contact and request details are accurate.",
     emergencyTitle: "Emergency requests are not accepted",
     emergencyIntro: "If this is urgent, safety-related, or business-critical, use the official emergency channel instead.",
     notEmergency: "I confirm this is not an emergency or urgent request.",
@@ -102,8 +104,14 @@ const translations = {
     createError: "Could not create ticket.",
     updateError: "Could not update ticket.",
     clearError: "Could not clear completed tickets.",
+    authRequired: "Enter the admin passcode first.",
+    authFailed: "Admin passcode is missing or incorrect.",
     ownerView: "Owner View",
     ticketQueue: "Ticket queue",
+    adminAccess: "Admin access",
+    adminHint: "Enter the preset 4-8 character passcode to update tickets, export CSV, or clear completed tickets.",
+    adminPasscode: "Passcode",
+    adminPasscodePlaceholder: "4-8 characters",
     exportCsv: "Export CSV",
     clearDone: "Clear Done",
     search: "Search",
@@ -128,7 +136,7 @@ const translations = {
     referenceField: "Reference",
     availabilityField: "Availability",
     verifiedPhoneField: "Verified phone",
-    identityField: "Internal ID",
+    identityField: "Internal reference",
     orgCodeField: "Department code",
     companyLegalNameField: "Legal entity",
     companyRegistrationNumberField: "Registration number",
@@ -168,9 +176,10 @@ const translations = {
     newRequest: "新请求",
     reset: "重置",
     verificationTitle: "请求人验证",
-    verificationIntro: "提交前必须验证手机号和内部 ID，并确认信息真实完整。",
+    verificationIntro: "提交前必须提供基础联系方式验证，并确认信息真实完整。",
     hardVerificationTitle: "公司/机构文件",
-    hardVerificationIntro: "严格模式下，请求人必须提供组织层面的证明材料，才能提出请求。",
+    hardVerificationIntro: "严格模式下，请求人必须提供组织层面的公开证明材料，才能提出请求。",
+    privacyNotice: "请不要提交政府身份证件、非公开证书、密码或敏感个人信息。请使用公开的企业/机构记录，并只保留必要信息。",
     companyLegalName: "法定主体名称",
     companyLegalNamePlaceholder: "注册公司或机构名称",
     companyRegistrationNumber: "注册/证书编号",
@@ -187,15 +196,15 @@ const translations = {
     authorizationReferencePlaceholder: "说明该人员和组织为什么有权提出此请求。",
     phone: "手机号码",
     phonePlaceholder: "+86 138 0000 0000",
-    identityId: "工号或学号",
-    identityPlaceholder: "员工号或学生号",
+    identityId: "内部参考编号",
+    identityPlaceholder: "员工号、团队编号或案件编号",
     orgCode: "部门代码",
     orgPlaceholder: "团队或办公室代码",
     verificationCode: "验证码",
     refreshCode: "刷新验证码",
     typeCode: "输入验证码",
     codePlaceholder: "6 位数字",
-    verificationConfirm: "我确认手机号、ID 和请求信息准确无误。",
+    verificationConfirm: "我确认联系方式和请求信息准确无误。",
     emergencyTitle: "不接受紧急请求",
     emergencyIntro: "如果这是紧急、安全相关或关键业务问题，请使用正式紧急渠道。",
     notEmergency: "我确认这不是紧急或加急请求。",
@@ -237,8 +246,14 @@ const translations = {
     createError: "无法创建工单。",
     updateError: "无法更新工单。",
     clearError: "无法清除已完成工单。",
+    authRequired: "请先输入管理员密码。",
+    authFailed: "管理员密码缺失或错误。",
     ownerView: "处理人视图",
     ticketQueue: "工单队列",
+    adminAccess: "管理员权限",
+    adminHint: "输入预先设置的 4-8 位密码后，才能更新工单、导出 CSV 或清除已完成工单。",
+    adminPasscode: "密码",
+    adminPasscodePlaceholder: "4-8 位字符",
     exportCsv: "导出 CSV",
     clearDone: "清除已完成",
     search: "搜索",
@@ -263,7 +278,7 @@ const translations = {
     referenceField: "参考信息",
     availabilityField: "配合状态",
     verifiedPhoneField: "已验证手机号",
-    identityField: "内部 ID",
+    identityField: "内部参考编号",
     orgCodeField: "部门代码",
     companyLegalNameField: "法定主体",
     companyRegistrationNumberField: "注册/证书编号",
@@ -284,6 +299,7 @@ const state = {
   tickets: [],
   selectedId: localStorage.getItem(selectedKey) || null,
   language: localStorage.getItem(languageKey) || "zh",
+  adminPasscode: sessionStorage.getItem(adminPasscodeKey) || "",
   filters: {
     search: "",
     status: "all",
@@ -319,6 +335,7 @@ const elements = {
   searchTickets: document.querySelector("#searchTickets"),
   statusFilter: document.querySelector("#statusFilter"),
   priorityFilter: document.querySelector("#priorityFilter"),
+  adminPasscode: document.querySelector("#adminPasscode"),
   exportCsv: document.querySelector("#exportCsv"),
   clearDone: document.querySelector("#clearDone"),
   copyReply: document.querySelector("#copyReply"),
@@ -376,7 +393,7 @@ function defaultSiteConfig() {
         hard: {
           requireChallenge: true,
           requireVerificationConfirm: true,
-          verificationFields: ["phone", "identityId", "orgCode"],
+          verificationFields: ["phone", "orgCode"],
           companyFields: [
             "companyLegalName",
             "companyRegistrationNumber",
@@ -423,6 +440,9 @@ function defaultSiteConfig() {
         submit: { limit: 6, windowSeconds: 3600 },
         api: { limit: 120, windowSeconds: 300 }
       }
+    },
+    admin: {
+      enabled: true
     }
   };
 }
@@ -458,6 +478,7 @@ function mergeConfig(base, override) {
     text: { ...base.text, ...(override.text || {}) },
     ad: { ...base.ad, ...(override.ad || {}) },
     strictness: mergeStrictness(base.strictness, override.strictness),
+    admin: { ...base.admin, ...(override.admin || {}) },
     emergency: { ...base.emergency, ...(override.emergency || {}) },
     validation: { ...base.validation, ...(override.validation || {}) },
     security: { ...base.security, ...(override.security || {}) },
@@ -610,6 +631,12 @@ function localizedConfigText(value, fallback) {
 }
 
 function bindEvents() {
+  elements.adminPasscode.value = state.adminPasscode;
+  elements.adminPasscode.addEventListener("input", (event) => {
+    state.adminPasscode = event.target.value.trim();
+    sessionStorage.setItem(adminPasscodeKey, state.adminPasscode);
+  });
+
   elements.tabs.forEach((tab) => {
     tab.addEventListener("click", () => switchView(tab.dataset.view));
   });
@@ -963,6 +990,8 @@ function hardCompanyDetailBoxes(ticket) {
 async function updateTicket(id, patch) {
   const ticket = state.tickets.find((item) => item.id === id);
   if (!ticket) return;
+  const passcode = requireAdminPasscode();
+  if (!passcode) return;
 
   Object.assign(ticket, patch, { updatedAt: new Date().toISOString() });
   render();
@@ -970,7 +999,7 @@ async function updateTicket(id, patch) {
   try {
     const response = await fetch(`/api/tickets/${encodeURIComponent(id)}`, {
       method: "PATCH",
-      headers: { "Content-Type": "application/json" },
+      headers: adminHeaders({ "Content-Type": "application/json" }, passcode),
       body: JSON.stringify(patch)
     });
     if (!response.ok) throw new Error(await response.text());
@@ -1026,11 +1055,30 @@ function filteredTickets() {
   });
 }
 
-function exportTickets() {
-  window.location.href = "/api/tickets.csv";
+async function exportTickets() {
+  const passcode = requireAdminPasscode();
+  if (!passcode) return;
+
+  try {
+    const response = await fetch("/api/tickets.csv", { headers: adminHeaders({}, passcode) });
+    if (!response.ok) throw new Error(await response.text());
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "personal-request-desk.csv";
+    document.body.append(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  } catch (error) {
+    setStatus(error.message || t("authFailed"), true);
+  }
 }
 
 async function clearDoneTickets() {
+  const passcode = requireAdminPasscode();
+  if (!passcode) return;
   const doneCount = state.tickets.filter((ticket) => ticket.status === "Done").length;
   if (doneCount === 0) return;
 
@@ -1038,12 +1086,32 @@ async function clearDoneTickets() {
   if (!confirmed) return;
 
   try {
-    const response = await fetch("/api/tickets?status=Done", { method: "DELETE" });
+    const response = await fetch("/api/tickets?status=Done", {
+      method: "DELETE",
+      headers: adminHeaders({}, passcode)
+    });
     if (!response.ok) throw new Error(await response.text());
     await loadTickets();
   } catch (error) {
     setStatus(error.message || t("clearError"), true);
   }
+}
+
+function requireAdminPasscode() {
+  const passcode = state.adminPasscode.trim();
+  if (!/^[A-Za-z0-9]{4,8}$/.test(passcode)) {
+    elements.adminPasscode.focus();
+    setStatus(t("authRequired"), true);
+    return "";
+  }
+  return passcode;
+}
+
+function adminHeaders(headers = {}, passcode = state.adminPasscode.trim()) {
+  return {
+    ...headers,
+    "X-Admin-Passcode": passcode
+  };
 }
 
 async function copyReplyText() {

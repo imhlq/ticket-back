@@ -32,8 +32,11 @@
     },
     "url": ""
   },
+  "admin": {
+    "passcode": "2468"
+  },
   "strictness": {
-    "activeLevel": "middle",
+    "activeLevel": "hard",
     "levels": {
       "easy": {
         "requireChallenge": false,
@@ -50,7 +53,7 @@
       "hard": {
         "requireChallenge": true,
         "requireVerificationConfirm": true,
-        "verificationFields": ["phone", "identityId", "orgCode"],
+        "verificationFields": ["phone", "orgCode"],
         "companyFields": [
           "companyLegalName",
           "companyRegistrationNumber",

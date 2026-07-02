@@ -26,13 +26,28 @@ It is not about being rude. It is about making the relationship more equal.
 
 ## Features
 
-- Chinese-first bilingual interface
-- Required request form before someone can ask for your time
-- Configurable strictness levels: `easy`, `middle`, and `hard`
-- Ticket queue, status tracking, owner notes, and CSV export
-- Configurable categories, priorities, text, validation rules, and ad placeholder
-- Basic spam resistance and private runtime data protection
-- Emergency/urgent request rejection
+- Chinese-first bilingual intake interface
+- Configurable intake strictness with `easy`, `middle`, and `hard` modes
+- Ticket queue with status tracking, owner notes, and CSV export
+- Admin passcode protection for ticket operations and exports
+- Configurable site text, categories, priorities, validation rules, ad placeholder, and emergency keywords
+- Spam and abuse reduction with honeypot fields, request size limits, rate limits, private file blocking, and emergency keyword rejection
+
+## Strictness modes
+
+| Mode | Verification | Required organization data | Best for |
+| --- | --- | --- | --- |
+| `easy` | No challenge code, no verification confirmation, no phone/internal reference/department requirement | None | Friendly personal intake, low-friction demos, trusted requesters |
+| `middle` | Phone, internal reference ID, department code, verification code, and confirmation checkbox | None | Normal personal request desk use where requesters should provide traceable context |
+| `hard` | Phone, department code, verification code, and confirmation checkbox | Legal entity name, registration number, tax ID, certificate authority, public certificate/registry link, authorized representative, and authorization reference | Organization-facing requests where the requester should provide public business credentials first |
+
+## Privacy note
+
+Do not use this project to collect government IDs, private certificates, passwords, or sensitive personal information unless you have a lawful basis, clear notice, appropriate consent where required, secure storage, limited retention, and a way for people to request deletion. Hard mode is intended for public organization credentials, not personal identity documents.
+
+## 隐私提示
+
+除非你有合法依据、清晰告知、必要同意、安全存储、有限留存，以及删除请求机制，否则不要用本项目收集政府身份证件、非公开证书、密码或敏感个人信息。困难模式的目标是收集公开的公司/机构凭证，而不是个人身份证明文件。
 
 ## Run
 
@@ -56,14 +71,11 @@ Edit `site_config.json` to customize:
 - site title and text
 - categories and priorities
 - ad placeholder content
+- admin passcode
 - validation limits
 - rate limits
 - emergency keywords
 
-Strictness levels:
-
-- `easy`: basic request details, minimal verification
-- `middle`: current default, with phone/internal ID/department code and verification code
-- `hard`: middle level plus company documentation such as legal entity name, registration number, tax ID, certificate authority, certificate link, authorized representative, and authorization reference
-
 Runtime tickets are stored in `tickets.json`, which is ignored by git.
+
+Admin actions use the 4-8 character `admin.passcode` value in `site_config.json`. Change the demo passcode before sharing or deploying the app.

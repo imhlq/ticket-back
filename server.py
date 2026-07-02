@@ -45,6 +45,7 @@ COMPANY_FIELDS = {
 PHONE_RE = re.compile(r"^[+0-9 ()-]{7,24}$")
 ID_RE = re.compile(r"^[A-Za-z0-9-]{4,32}$")
 ORG_RE = re.compile(r"^[A-Za-z0-9-]{3,24}$")
+PASSCODE_RE = re.compile(r"^[A-Za-z0-9]{4,8}$")
 CHALLENGES = {}
 RATE_LIMITS = {}
 CHALLENGE_TTL_SECONDS = 10 * 60
@@ -55,6 +56,9 @@ DEFAULT_CONFIG = {
     "emergency": {
         "enabled": True,
         "keywords": ["emergency", "urgent", "asap", "immediately", "911", "紧急", "急需", "立即", "马上"],
+    },
+    "admin": {
+        "passcode": "2468",
     },
     "strictness": {
         "activeLevel": "middle",
@@ -74,7 +78,7 @@ DEFAULT_CONFIG = {
             "hard": {
                 "requireChallenge": True,
                 "requireVerificationConfirm": True,
-                "verificationFields": ["phone", "identityId", "orgCode"],
+                "verificationFields": ["phone", "orgCode"],
                 "companyFields": [
                     "companyLegalName",
                     "companyRegistrationNumber",
@@ -260,6 +264,7 @@ def load_config():
     merged = {
         **DEFAULT_CONFIG,
         **config,
+        "admin": {**DEFAULT_CONFIG["admin"], **config.get("admin", {})},
         "emergency": {**DEFAULT_CONFIG["emergency"], **config.get("emergency", {})},
         "strictness": merge_strictness(DEFAULT_CONFIG["strictness"], config.get("strictness", {})),
         "validation": {**DEFAULT_CONFIG["validation"], **config.get("validation", {})},
@@ -270,6 +275,18 @@ def load_config():
         **config.get("security", {}).get("rateLimits", {}),
     }
     return merged
+
+
+def public_config(config):
+    public = json.loads(json.dumps(config))
+    passcode = admin_passcode(config)
+    public["admin"] = {"enabled": bool(passcode)}
+    return public
+
+
+def admin_passcode(config):
+    passcode = clean(config.get("admin", {}).get("passcode"))
+    return passcode if PASSCODE_RE.match(passcode) else ""
 
 
 def merge_strictness(base, override):
@@ -374,7 +391,7 @@ def validate_payload(values, payload, config, strictness):
     if "phone" in values and not PHONE_RE.match(values["phone"]):
         raise ValueError("Phone number must be 7-24 characters and use only digits, spaces, +, -, or parentheses.")
     if "identityId" in values and not ID_RE.match(values["identityId"]):
-        raise ValueError("Work or school ID must be 4-32 letters, numbers, or hyphens.")
+        raise ValueError("Internal reference ID must be 4-32 letters, numbers, or hyphens.")
     if "orgCode" in values and not ORG_RE.match(values["orgCode"]):
         raise ValueError("Department code must be 3-24 letters, numbers, or hyphens.")
     validate_company_fields(values)
@@ -451,7 +468,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         if parsed.path == "/api/config":
             if not self.rate_limit("api", config):
                 return
-            self.send_json(load_config())
+            self.send_json(public_config(config))
             return
         if parsed.path == "/api/challenge":
             if not self.rate_limit("challenge", config):
@@ -465,6 +482,8 @@ class RequestHandler(BaseHTTPRequestHandler):
             return
         if parsed.path == "/api/tickets.csv":
             if not self.rate_limit("api", config):
+                return
+            if not self.require_admin(config):
                 return
             self.send_text(
                 STORE.csv(),
@@ -502,6 +521,8 @@ class RequestHandler(BaseHTTPRequestHandler):
         try:
             if not self.rate_limit("api", config):
                 return
+            if not self.require_admin(config):
+                return
             self.send_json(STORE.update(ticket_id, self.read_json(config)))
         except KeyError:
             self.send_text("Ticket not found", status=HTTPStatus.NOT_FOUND)
@@ -516,8 +537,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         parsed = urlparse(self.path)
         query = parse_qs(parsed.query)
         if parsed.path == "/api/tickets" and query.get("status") == ["Done"]:
+            config = load_config()
             try:
-                if not self.rate_limit("api", load_config()):
+                if not self.rate_limit("api", config):
+                    return
+                if not self.require_admin(config):
                     return
                 self.send_json({"removed": STORE.clear_done()})
             except RateLimitExceeded as error:
@@ -545,6 +569,14 @@ class RequestHandler(BaseHTTPRequestHandler):
         except RateLimitExceeded as error:
             self.send_text(str(error), status=HTTPStatus.TOO_MANY_REQUESTS)
             return False
+
+    def require_admin(self, config):
+        expected = admin_passcode(config)
+        provided = clean(self.headers.get("X-Admin-Passcode"))
+        if not expected or not provided or not secrets.compare_digest(provided, expected):
+            self.send_text("Admin passcode is missing or incorrect.", status=HTTPStatus.UNAUTHORIZED)
+            return False
+        return True
 
     def serve_static(self, request_path):
         path = unquote(request_path).lstrip("/") or "index.html"

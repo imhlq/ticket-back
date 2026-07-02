@@ -71,7 +71,7 @@
 
             <fieldset class="verification-box">
               <legend data-i18n="verificationTitle">Requester verification</legend>
-              <p data-i18n="verificationIntro">Verify your phone and internal ID before the request form can be submitted.</p>
+              <p data-i18n="verificationIntro">Provide basic contact verification before the request form can be submitted.</p>
 
               <div class="form-grid">
                 <label for="phone">
@@ -79,8 +79,8 @@
                   <input id="phone" name="phone" type="tel" required pattern="^[+0-9 ()-]{7,24}$" data-i18n-placeholder="phonePlaceholder" placeholder="+1 555 010 1234">
                 </label>
                 <label for="identityId">
-                  <span data-i18n="identityId">Work or school ID</span>
-                  <input id="identityId" name="identityId" required minlength="4" maxlength="32" pattern="^[A-Za-z0-9-]{4,32}$" data-i18n-placeholder="identityPlaceholder" placeholder="Employee or student ID">
+                  <span data-i18n="identityId">Internal reference ID</span>
+                  <input id="identityId" name="identityId" required minlength="4" maxlength="32" pattern="^[A-Za-z0-9-]{4,32}$" data-i18n-placeholder="identityPlaceholder" placeholder="Employee, team, or case ID">
                 </label>
                 <label for="orgCode">
                   <span data-i18n="orgCode">Department code</span>
@@ -103,13 +103,14 @@
 
               <label class="check" for="verificationConfirm">
                 <input id="verificationConfirm" name="verificationConfirm" type="checkbox" required>
-                <span data-i18n="verificationConfirm">I confirm my phone, ID, and request details are accurate.</span>
+                <span data-i18n="verificationConfirm">I confirm the contact and request details are accurate.</span>
               </label>
             </fieldset>
 
             <fieldset class="hard-verification-box" id="hardVerificationBox">
               <legend data-i18n="hardVerificationTitle">Company documentation</legend>
-              <p data-i18n="hardVerificationIntro">For strict mode, the requester must provide organization-level records before asking for work.</p>
+              <p data-i18n="hardVerificationIntro">For strict mode, the requester must provide organization-level public records before asking for work.</p>
+              <p class="privacy-note" data-i18n="privacyNotice">Do not submit government IDs, private certificates, passwords, or sensitive personal information. Use public business records and keep only what is necessary.</p>
 
               <div class="form-grid">
                 <label for="companyLegalName">
@@ -230,6 +231,17 @@
               <button class="danger" id="clearDone" type="button" data-i18n="clearDone">Clear Done</button>
             </div>
           </div>
+
+          <section class="admin-gate" aria-labelledby="admin-title">
+            <div>
+              <h3 id="admin-title" data-i18n="adminAccess">Admin access</h3>
+              <p data-i18n="adminHint">Enter the preset 4-8 character passcode to update tickets, export CSV, or clear completed tickets.</p>
+            </div>
+            <label for="adminPasscode">
+              <span data-i18n="adminPasscode">Passcode</span>
+              <input id="adminPasscode" name="adminPasscode" type="password" inputmode="text" minlength="4" maxlength="8" autocomplete="off" data-i18n-placeholder="adminPasscodePlaceholder" placeholder="4-8 characters">
+            </label>
+          </section>
 
           <div class="filters" aria-label="Queue filters">
             <label for="searchTickets">
