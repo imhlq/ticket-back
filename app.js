@@ -14,11 +14,6 @@ const translations = {
     headline: "Requests start with a ticket.",
     tabSubmit: "Submit",
     tabQueue: "Queue",
-    callReplyTitle: "Call Reply",
-    replyText: "Please submit a ticket first so I have the request, priority, deadline, and contact details in one place. Emergency or urgent work is not accepted here.",
-    copyReply: "Copy Reply",
-    copied: "Copied",
-    copyFailed: "Copy Failed",
     statOpen: "Open",
     statToday: "Today",
     statHigh: "High",
@@ -156,11 +151,6 @@ const translations = {
     headline: "先提交工单，再开始处理。",
     tabSubmit: "提交",
     tabQueue: "队列",
-    callReplyTitle: "电话回复",
-    replyText: "请先提交工单，把请求内容、优先级、截止时间和联系方式写清楚。紧急请求不在这里受理。",
-    copyReply: "复制回复",
-    copied: "已复制",
-    copyFailed: "复制失败",
     statOpen: "未完成",
     statToday: "今日",
     statHigh: "高优先级",
@@ -338,8 +328,6 @@ const elements = {
   adminPasscode: document.querySelector("#adminPasscode"),
   exportCsv: document.querySelector("#exportCsv"),
   clearDone: document.querySelector("#clearDone"),
-  copyReply: document.querySelector("#copyReply"),
-  replyText: document.querySelector("#replyText"),
   openCount: document.querySelector("#openCount"),
   todayCount: document.querySelector("#todayCount"),
   highCount: document.querySelector("#highCount"),
@@ -678,7 +666,6 @@ function bindEvents() {
 
   elements.exportCsv.addEventListener("click", exportTickets);
   elements.clearDone.addEventListener("click", clearDoneTickets);
-  elements.copyReply.addEventListener("click", copyReplyText);
   elements.adAction.addEventListener("click", handleAdAction);
   elements.adClose.addEventListener("click", closeAd);
 }
@@ -1112,21 +1099,6 @@ function adminHeaders(headers = {}, passcode = state.adminPasscode.trim()) {
     ...headers,
     "X-Admin-Passcode": passcode
   };
-}
-
-async function copyReplyText() {
-  const text = `${elements.replyText.textContent} ${window.location.href}`;
-
-  try {
-    await navigator.clipboard.writeText(text);
-    elements.copyReply.textContent = t("copied");
-  } catch {
-    elements.copyReply.textContent = t("copyFailed");
-  }
-
-  window.setTimeout(() => {
-    elements.copyReply.textContent = t("copyReply");
-  }, 1600);
 }
 
 function setMinimumDate() {

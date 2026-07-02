@@ -7,13 +7,11 @@
   "text": {
     "en": {
       "brand": "Personal Desk",
-      "headline": "Requests start with a ticket.",
-      "replyText": "Please submit a ticket first so I have the request, priority, deadline, and contact details in one place. Emergency or urgent work is not accepted here."
+      "headline": "Requests start with a ticket."
     },
     "zh": {
       "brand": "个人服务台",
-      "headline": "先提交工单，再开始处理。",
-      "replyText": "请先提交工单，把请求内容、优先级、截止时间和联系方式写清楚。紧急请求不在这里受理。"
+      "headline": "先提交工单，再开始处理。"
     }
   },
   "ad": {
